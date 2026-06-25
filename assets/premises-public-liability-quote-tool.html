@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>處所公共意外責任保險報價單系統</title>
+  <style>
+    :root {
+      --ink: #172438;
+      --muted: #5e6b78;
+      --line: #cbd7e2;
+      --head: #15324d;
+      --head-2: #2f5f7c;
+      --paper: #fff;
+      --soft: #eef5f9;
+      --field: #fff8e3;
+      --yellow: #fff200;
+      --danger: #b42318;
+      --ok: #2f7d32;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      color: var(--ink);
+      background: #f4f7fa;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    .topbar {
+      background: var(--head);
+      color: #fff;
+      padding: 16px 22px 14px;
+      border-bottom: 4px solid #5e9fc0;
+    }
+    .topbar h1 { margin: 0; font-size: 26px; letter-spacing: 0; }
+    .topbar p { margin: 5px 0 0; color: #dbeaf2; font-size: 14px; }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(430px, 540px) minmax(760px, 1fr);
+      gap: 18px;
+      padding: 18px;
+      align-items: start;
+    }
+    .panel, .preview-shell {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--head-2);
+      color: #fff;
+      font-weight: 700;
+    }
+    .panel-body { padding: 14px; }
+    .section-title {
+      margin: 18px 0 8px;
+      padding: 7px 10px;
+      background: var(--soft);
+      border-left: 4px solid var(--head-2);
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .field {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .field.wide { grid-column: 1 / -1; }
+    input, select, textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #9fb4c8;
+      border-radius: 6px;
+      background: var(--field);
+      color: var(--ink);
+      padding: 8px 9px;
+      min-height: 38px;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid #69a9c9;
+      outline-offset: 1px;
+    }
+    textarea { resize: vertical; min-height: 74px; }
+    .btn {
+      border: 1px solid #9fb4c8;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn.primary { background: var(--head); border-color: var(--head); color: #fff; }
+    .btn.good { background: var(--ok); border-color: var(--ok); color: #fff; }
+    .btn.danger { color: var(--danger); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .location-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-top: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .location-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #f0f5f9;
+      font-weight: 700;
+    }
+    .location-body { padding: 10px; }
+    .mini-note { color: var(--muted); font-size: 13px; margin: 7px 0 0; }
+    .input-table { width: 100%; border-collapse: collapse; }
+    .input-table th, .input-table td {
+      border: 1px solid var(--line);
+      padding: 7px;
+      vertical-align: middle;
+    }
+    .input-table th { background: var(--head-2); color: #fff; }
+    .quote {
+      background: #fff;
+      min-height: 960px;
+      padding: 24px;
+      overflow: auto;
+    }
+    .quote-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      border-bottom: 3px solid var(--head);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .quote-title h2 { margin: 0; font-size: 28px; letter-spacing: 0; }
+    .meta { text-align: right; color: var(--muted); font-size: 13px; }
+    .quote h3 {
+      margin: 10px 0 4px;
+      padding: 3px 6px;
+      background: var(--yellow);
+      color: #000;
+      font-size: 14px;
+    }
+    .quote table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .quote th, .quote td {
+      border: 1px solid #d7e0e8;
+      padding: 4px 6px;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    .quote th { background: var(--yellow); color: #000; font-weight: 700; border-color: #d8d15f; }
+    .quote td { border-color: #d7dee6; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 130px 1fr 130px 1fr;
+      border: 1px solid #d7e0e8;
+      border-bottom: 0;
+    }
+    .info-grid > div { border-bottom: 1px solid #d7e0e8; padding: 7px 8px; }
+    .info-label { background: #f4f8fb; font-weight: 700; }
+    .limit-row td:nth-child(2) { color: #d12a1f; font-weight: 700; text-align: center; }
+    .empty { color: var(--muted); padding: 40px; text-align: center; border: 1px dashed var(--line); }
+    .check-row {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      padding: 7px 9px;
+      margin-bottom: 6px;
+      border-radius: 7px;
+    }
+    .check-row input { min-height: auto; }
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      .quote { padding: 18px; }
+    }
+    @media print {
+      body { background: #fff; }
+      .topbar, .panel, .panel-header .print-only-hide { display: none !important; }
+      .app { display: block; padding: 0; }
+      .preview-shell { border: 0; border-radius: 0; }
+      .panel-header { display: none; }
+      .quote { padding: 0; overflow: visible; }
+      .quote-title h2 { font-size: 26px; }
+      @page { size: A4 landscape; margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>處所公共意外責任保險報價單系統</h1>
+    <p>輸入被保險人、處所資訊與報價額度，產生可列印成 PDF 的公共意外險報價單。</p>
+  </header>
+
+  <main class="app">
+    <section class="panel">
+      <div class="panel-header">
+        <span>INPUT：報價資料</span>
+        <span id="saveStatus">尚未產生</span>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <button class="btn" id="sampleBtn" type="button">帶入範例</button>
+          <button class="btn danger" id="clearBtn" type="button">清空</button>
+          <button class="btn primary" id="generateBtn" type="button">產生報價單</button>
+          <button class="btn good" id="printBtn" type="button">列印 / 存成 PDF</button>
+        </div>
+
+        <div class="section-title">被保險人資訊</div>
+        <div class="grid">
+          <label class="field">公司名稱
+            <input id="companyName">
+          </label>
+          <label class="field">統一編號
+            <input id="taxId">
+          </label>
+          <label class="field">代表人
+            <input id="representative">
+          </label>
+          <label class="field">電話
+            <input id="phone">
+          </label>
+          <label class="field wide">通訊地址
+            <input id="mailingAddress">
+          </label>
+        </div>
+
+        <div class="section-title">公共意外險處所資料</div>
+        <div id="locations"></div>
+        <button class="btn" id="addLocationBtn" type="button" style="margin-top:8px">新增處所</button>
+        <p class="mini-note">每個處所可填坪數、使用性質、招牌、電梯、烤漆爐、修理廠、樓層與消防設備。</p>
+
+        <div class="section-title">報價額度</div>
+        <div class="grid">
+          <label class="field">每一人體傷
+            <input id="limitPersonInjury" placeholder="例：600萬">
+          </label>
+          <label class="field">每一事故體傷
+            <input id="limitAccidentInjury" placeholder="例：3000萬">
+          </label>
+          <label class="field">每一事故財損
+            <input id="limitPropertyDamage" placeholder="例：500萬">
+          </label>
+          <label class="field">最高賠償限額
+            <input id="limitAggregate" placeholder="例：7000萬">
+          </label>
+          <label class="field">自負額
+            <input id="deductible" placeholder="例：5000">
+          </label>
+        </div>
+
+        <div class="section-title">附加條款</div>
+        <div id="clauses"></div>
+        <div class="toolbar">
+          <button class="btn" id="selectAllClausesBtn" type="button">全選</button>
+          <button class="btn" id="clearClausesBtn" type="button">清空條款</button>
+          <button class="btn" id="addCustomClauseBtn" type="button">新增自訂條款</button>
+        </div>
+        <div id="customClauses"></div>
+
+        <div class="section-title">備註</div>
+        <label class="field wide">備註
+          <textarea id="remarks" placeholder="可輸入核保備註或特殊約定"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="preview-shell">
+      <div class="panel-header">
+        <span>OUTPUT：報價單預覽</span>
+        <span class="print-only-hide">可列印成 PDF</span>
+      </div>
+      <div class="quote" id="quotePreview">
+        <div class="empty">填完左側資料後，按「產生報價單」。</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DEFAULT_CLAUSES = [
+      "公共意外責任保險電梯責任附加條款",
+      "公共意外責任保險停車場責任附加條款",
+      "公共意外責任保險汽車修理廠責任附加條款",
+      "公共意外責任保險食物中毒附加條款",
+      "公共意外招牌責任附加條款"
+    ];
+
+    const yesNo = ["有", "無"];
+
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[ch]));
+    }
+
+    function plain(value) {
+      return String(value ?? "").trim();
+    }
+
+    function formatNumberLike(value) {
+      const text = plain(value);
+      if (!text) return "";
+      if (/萬|元|％|%/.test(text)) return text;
+      const cleaned = text.replace(/,/g, "");
+      if (/^\d+(\.\d+)?$/.test(cleaned)) {
+        return Number(cleaned).toLocaleString("zh-TW");
+      }
+      return text;
+    }
+
+    function optionHtml(value, selected) {
+      return `<option ${String(value) === String(selected || "") ? "selected" : ""}>${escapeHtml(value)}</option>`;
+    }
+
+    function boolSelect(name, value = "") {
+      return `
+        <select data-field="${name}">
+          ${yesNo.map(v => optionHtml(v, value || "無")).join("")}
+        </select>
+      `;
+    }
+
+    function locationTemplate(index, data = {}) {
+      return `
+        <div class="location-block" data-location>
+          <div class="location-head">
+            <span>處所 ${index + 1}</span>
+            <button class="btn danger remove-location" type="button">刪除</button>
+          </div>
+          <div class="location-body">
+            <div class="grid">
+              <label class="field">名稱
+                <input data-field="siteName" value="${escapeHtml(data.siteName || "")}" placeholder="例：總公司、門市、倉庫">
+              </label>
+              <label class="field">坪數
+                <input data-field="ping" value="${escapeHtml(data.ping || "")}" placeholder="例：318">
+              </label>
+              <label class="field wide">處所地址
+                <input data-field="address" value="${escapeHtml(data.address || "")}">
+              </label>
+              <label class="field">使用性質
+                <input data-field="usageNature" value="${escapeHtml(data.usageNature || "")}" placeholder="例：辦公室、維修廠、倉庫">
+              </label>
+              <label class="field">是否有招牌
+                ${boolSelect("signboard", data.signboard)}
+              </label>
+              <label class="field">是否有電梯
+                ${boolSelect("elevator", data.elevator)}
+              </label>
+              <label class="field">烤漆爐數量
+                <input data-field="paintOvenCount" value="${escapeHtml(data.paintOvenCount || "")}" placeholder="例：0">
+              </label>
+              <label class="field">是否有修理廠
+                ${boolSelect("repairShop", data.repairShop)}
+              </label>
+              <label class="field">樓層數
+                <input data-field="floorCount" value="${escapeHtml(data.floorCount || "")}" placeholder="例：2">
+              </label>
+              <label class="field">火災受信總機
+                ${boolSelect("fireReceiver", data.fireReceiver)}
+              </label>
+              <label class="field">消防撒水系統
+                ${boolSelect("sprinkler", data.sprinkler)}
+              </label>
+              <label class="field">室外停車場
+                ${boolSelect("outdoorParking", data.outdoorParking)}
+              </label>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateLocationNumbers() {
+      [...document.querySelectorAll("[data-location]")].forEach((block, idx) => {
+        block.querySelector(".location-head span").textContent = `處所 ${idx + 1}`;
+      });
+    }
+
+    function addLocation(data = {}) {
+      const box = byId("locations");
+      box.insertAdjacentHTML("beforeend", locationTemplate(box.querySelectorAll("[data-location]").length, data));
+      updateLocationNumbers();
+    }
+
+    function readLocations() {
+      return [...document.querySelectorAll("[data-location]")].map(block => {
+        const obj = {};
+        block.querySelectorAll("[data-field]").forEach(input => obj[input.dataset.field] = input.value);
+        return obj;
+      });
+    }
+
+    function renderClauses(selectedAll = true) {
+      byId("clauses").innerHTML = DEFAULT_CLAUSES.map((name, idx) => `
+        <label class="check-row">
+          <input type="checkbox" class="clause-check" value="${escapeHtml(name)}" ${selectedAll ? "checked" : ""}>
+          <span>${idx + 1}. ${escapeHtml(name)}</span>
+        </label>
+      `).join("");
+    }
+
+    function selectedClauses() {
+      const standard = [...document.querySelectorAll(".clause-check:checked")].map(el => el.value);
+      const custom = [...document.querySelectorAll(".custom-clause-input")].map(el => plain(el.value)).filter(Boolean);
+      return standard.concat(custom);
+    }
+
+    function addCustomClause(value = "") {
+      byId("customClauses").insertAdjacentHTML("beforeend", `
+        <div class="grid" style="grid-template-columns: 1fr 62px; margin-top: 8px">
+          <input class="custom-clause-input" value="${escapeHtml(value)}" placeholder="輸入自訂附加條款名稱">
+          <button class="btn danger remove-custom-clause" type="button">X</button>
+        </div>
+      `);
+    }
+
+    function generateQuote() {
+      const locations = readLocations();
+      const clauses = selectedClauses();
+      const dateText = new Date().toLocaleDateString("zh-TW");
+      const limitRows = [
+        ["每一人體傷", byId("limitPersonInjury").value],
+        ["每一事故體傷", byId("limitAccidentInjury").value],
+        ["每一事故財損", byId("limitPropertyDamage").value],
+        ["最高賠償限額", byId("limitAggregate").value],
+        ["自負額", byId("deductible").value]
+      ].map(([label, value]) => `<tr class="limit-row"><td>${label}</td><td>${escapeHtml(formatNumberLike(value))}</td></tr>`).join("");
+
+      const locationRows = locations.map((loc, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${escapeHtml(loc.siteName || "")}</td>
+          <td>${escapeHtml(loc.address || "")}</td>
+          <td style="text-align:right">${escapeHtml(formatNumberLike(loc.ping))}</td>
+          <td>${escapeHtml(loc.usageNature || "")}</td>
+          <td style="text-align:center">${escapeHtml(loc.signboard || "")}</td>
+          <td style="text-align:center">${escapeHtml(loc.elevator || "")}</td>
+          <td style="text-align:center">${escapeHtml(formatNumberLike(loc.paintOvenCount))}</td>
+          <td style="text-align:center">${escapeHtml(loc.repairShop || "")}</td>
+          <td style="text-align:center">${escapeHtml(formatNumberLike(loc.floorCount))}</td>
+          <td style="text-align:center">${escapeHtml(loc.fireReceiver || "")}</td>
+          <td style="text-align:center">${escapeHtml(loc.sprinkler || "")}</td>
+          <td style="text-align:center">${escapeHtml(loc.outdoorParking || "")}</td>
+        </tr>
+      `).join("");
+
+      byId("quotePreview").innerHTML = `
+        <div class="quote-title">
+          <div>
+            <h2>處所公共意外責任保險報價單</h2>
+          </div>
+          <div class="meta">
+            <div>製表日期：${escapeHtml(dateText)}</div>
+          </div>
+        </div>
+
+        <h3>被保險人資訊</h3>
+        <div class="info-grid">
+          <div class="info-label">公司名稱</div><div>${escapeHtml(byId("companyName").value)}</div>
+          <div class="info-label">統一編號</div><div>${escapeHtml(byId("taxId").value)}</div>
+          <div class="info-label">代表人</div><div>${escapeHtml(byId("representative").value)}</div>
+          <div class="info-label">電話</div><div>${escapeHtml(byId("phone").value)}</div>
+          <div class="info-label">通訊地址</div><div style="grid-column: span 3">${escapeHtml(byId("mailingAddress").value)}</div>
+        </div>
+
+        <h3>公共意外險處所資料</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px">#</th><th>名稱</th><th>處所地址</th><th>坪數</th><th>使用性質</th>
+              <th>招牌</th><th>電梯</th><th>烤漆爐</th><th>修理廠</th><th>樓層</th><th>火災受信總機</th><th>消防撒水系統</th><th>室外停車場</th>
+            </tr>
+          </thead>
+          <tbody>${locationRows || `<tr><td colspan="13">尚未輸入處所資料</td></tr>`}</tbody>
+        </table>
+
+        <h3>報價額度</h3>
+        <table>
+          <tbody>${limitRows}</tbody>
+        </table>
+
+        <h3>附加條款</h3>
+        <ol>
+          ${clauses.map(name => `<li>${escapeHtml(name)}</li>`).join("") || "<li>無</li>"}
+        </ol>
+
+        <h3>備註</h3>
+        <table><tbody><tr><td>${escapeHtml(byId("remarks").value).replace(/\n/g, "<br>")}</td></tr></tbody></table>
+      `;
+      byId("saveStatus").textContent = "已產生";
+    }
+
+    function fillSample() {
+      byId("companyName").value = "範例汽車服務股份有限公司";
+      byId("taxId").value = "00000000";
+      byId("representative").value = "王小明";
+      byId("phone").value = "02-0000-0000";
+      byId("mailingAddress").value = "臺北市範例區測試路100號";
+      byId("locations").innerHTML = "";
+      addLocation({
+        siteName: "範例-服務廠A",
+        address: "臺北市範例區測試路100號1樓及2樓",
+        ping: "318",
+        usageNature: "汽車展示及維修服務區",
+        signboard: "有",
+        elevator: "有",
+        paintOvenCount: "0",
+        repairShop: "無",
+        floorCount: "2",
+        fireReceiver: "有",
+        sprinkler: "有",
+        outdoorParking: "有"
+      });
+      addLocation({
+        siteName: "範例-倉儲廠",
+        address: "臺北市範例區倉儲路200號(全棟)",
+        ping: "421",
+        usageNature: "倉庫",
+        signboard: "有",
+        elevator: "無",
+        paintOvenCount: "0",
+        repairShop: "有",
+        floorCount: "2",
+        fireReceiver: "有",
+        sprinkler: "有",
+        outdoorParking: "無"
+      });
+      byId("limitPersonInjury").value = "600萬";
+      byId("limitAccidentInjury").value = "3000萬";
+      byId("limitPropertyDamage").value = "500萬";
+      byId("limitAggregate").value = "7000萬";
+      byId("deductible").value = "5000";
+      byId("remarks").value = "";
+      renderClauses(true);
+      generateQuote();
+    }
+
+    function clearAll() {
+      [
+        "companyName", "taxId", "representative", "phone", "mailingAddress",
+        "limitPersonInjury", "limitAccidentInjury", "limitPropertyDamage", "limitAggregate",
+        "deductible", "remarks"
+      ].forEach(id => byId(id).value = "");
+      byId("locations").innerHTML = "";
+      byId("customClauses").innerHTML = "";
+      addLocation();
+      renderClauses(false);
+      byId("quotePreview").innerHTML = `<div class="empty">填完左側資料後，按「產生報價單」。</div>`;
+      byId("saveStatus").textContent = "已清空";
+    }
+
+    document.addEventListener("click", event => {
+      if (event.target.classList.contains("remove-location")) {
+        event.target.closest("[data-location]").remove();
+        updateLocationNumbers();
+      }
+      if (event.target.classList.contains("remove-custom-clause")) {
+        event.target.closest(".grid").remove();
+      }
+    });
+
+    byId("addLocationBtn").addEventListener("click", () => addLocation());
+    byId("generateBtn").addEventListener("click", generateQuote);
+    byId("printBtn").addEventListener("click", () => { generateQuote(); window.print(); });
+    byId("sampleBtn").addEventListener("click", fillSample);
+    byId("clearBtn").addEventListener("click", clearAll);
+    byId("selectAllClausesBtn").addEventListener("click", () => {
+      document.querySelectorAll(".clause-check").forEach(el => el.checked = true);
+    });
+    byId("clearClausesBtn").addEventListener("click", () => {
+      document.querySelectorAll(".clause-check").forEach(el => el.checked = false);
+    });
+    byId("addCustomClauseBtn").addEventListener("click", () => addCustomClause());
+
+    renderClauses(true);
+    addLocation();
+  </script>
+</body>
+</html>

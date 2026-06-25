@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>商業火災保險報價單系統 第一版</title>
+  <style>
+    :root {
+      --ink: #172438;
+      --muted: #5c6b7a;
+      --line: #cbd7e2;
+      --line-strong: #8ea4b7;
+      --head: #15324d;
+      --head-2: #2f5f7c;
+      --paper: #ffffff;
+      --soft: #eef5f9;
+      --field: #fff8e3;
+      --ok: #2e7d32;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      color: var(--ink);
+      background: #f4f7fa;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    .topbar {
+      background: var(--head);
+      color: #fff;
+      padding: 16px 22px 14px;
+      border-bottom: 4px solid #5e9fc0;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+    .topbar p {
+      margin: 5px 0 0;
+      color: #dbeaf2;
+      font-size: 14px;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(420px, 520px) minmax(680px, 1fr);
+      gap: 18px;
+      padding: 18px;
+      align-items: start;
+    }
+    .panel, .preview-shell {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--head-2);
+      color: #fff;
+      font-weight: 700;
+    }
+    .panel-body { padding: 14px; }
+    .section-title {
+      margin: 18px 0 8px;
+      padding: 7px 10px;
+      background: var(--soft);
+      border-left: 4px solid var(--head-2);
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    label.field {
+      display: grid;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    input, select, textarea {
+      min-width: 0;
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 8px 9px;
+      background: var(--field);
+      color: var(--ink);
+    }
+    textarea { min-height: 70px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid #69a9c9;
+      outline-offset: 1px;
+    }
+    .wide { grid-column: 1 / -1; }
+    .mini-note { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .btn {
+      border: 1px solid #9bb0c2;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn.primary {
+      background: var(--head);
+      color: #fff;
+      border-color: var(--head);
+    }
+    .btn.good {
+      background: var(--ok);
+      color: #fff;
+      border-color: var(--ok);
+    }
+    .btn.danger {
+      color: var(--danger);
+      border-color: #d49b94;
+    }
+    .btn:hover { filter: brightness(0.97); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 7px 8px;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    th {
+      background: var(--head-2);
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+    }
+    .input-table td { padding: 5px; }
+    .input-table input, .input-table select, .input-table textarea {
+      border-radius: 4px;
+      padding: 6px;
+    }
+    .location-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: #fbfdff;
+    }
+    .location-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #e6f0f6;
+      font-weight: 700;
+    }
+    .location-body { padding: 10px; }
+    .money-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .clause-box {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+    .clause-row {
+      display: grid;
+      grid-template-columns: 34px 74px 1fr;
+      gap: 8px;
+      align-items: start;
+      padding: 7px 8px;
+      border-bottom: 1px solid #e7edf3;
+      font-size: 13px;
+    }
+    .clause-row:last-child { border-bottom: 0; }
+    .clause-row input { width: 18px; height: 18px; margin: 1px auto 0; }
+    .quote {
+      background: #fff;
+      min-height: 960px;
+      padding: 24px;
+    }
+    .quote-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      border-bottom: 3px solid var(--head);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .quote-title h2 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+    .quote-title .meta { text-align: right; color: var(--muted); font-size: 13px; }
+    .quote h3 {
+      margin: 10px 0 4px;
+      font-size: 14px;
+      padding: 3px 6px;
+      background: #fff200;
+      color: #111;
+    }
+    .quote table { font-size: 12px; }
+    .quote th { background: #fff200; color: #111; border-color: #d8d15f; }
+    .quote th, .quote td { padding: 4px 6px; }
+    .quote td { border-color: #d7dee6; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 120px 1fr 120px 1fr;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      font-size: 13px;
+    }
+    .info-grid > div {
+      border-bottom: 1px solid var(--line);
+      padding: 7px 8px;
+      min-height: 32px;
+    }
+    .info-label { background: #eef5f9; font-weight: 700; }
+    .terms-list {
+      columns: 2;
+      column-gap: 26px;
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+    }
+    .terms-list li { break-inside: avoid; margin: 0 0 4px; }
+    .empty {
+      color: var(--muted);
+      padding: 28px;
+      text-align: center;
+      border: 1px dashed var(--line-strong);
+      background: #fbfdff;
+      border-radius: 8px;
+    }
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .topbar, .panel, .print-actions { display: none !important; }
+      .app { display: block; padding: 0; }
+      .preview-shell { border: 0; border-radius: 0; }
+      .quote { padding: 12mm; min-height: auto; }
+      @page { size: A4 landscape; margin: 8mm; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>商業火災保險報價單系統</h1>
+    <p>輸入公司與標的物資料，系統會依保額標的自動建議 SB 附加條款，並產生可列印成 PDF 的報價單。</p>
+  </header>
+
+  <main class="app">
+    <section class="panel">
+      <div class="panel-header">
+        <span>INPUT：報價資料</span>
+        <span id="saveStatus">尚未產生</span>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <button class="btn" id="sampleBtn" type="button">帶入範例</button>
+          <button class="btn" id="clearBtn" type="button">清空</button>
+          <button class="btn primary" id="generateBtn" type="button">產生報價單</button>
+          <button class="btn good" id="printBtn" type="button">列印 / 存成 PDF</button>
+        </div>
+
+        <div class="section-title">被保險人資訊</div>
+        <div class="grid">
+          <label class="field">產業別
+            <select id="industry">
+              <option>汽車業</option>
+              <option>一般商業</option>
+              <option>製造業</option>
+              <option>倉儲物流</option>
+              <option>其他</option>
+            </select>
+          </label>
+          <label class="field">公司名稱
+            <input id="companyName">
+          </label>
+          <label class="field">統一編號
+            <input id="taxId">
+          </label>
+          <label class="field">代表人
+            <input id="representative">
+          </label>
+          <label class="field">電話
+            <input id="phone">
+          </label>
+          <label class="field wide">通訊地址
+            <input id="mailingAddress">
+          </label>
+          <label class="field wide">保險期間
+            <input id="insurancePeriod" placeholder="例：2026/07/01 中午12時起至 2027/07/01 中午12時止">
+          </label>
+        </div>
+
+        <div class="section-title">標的物地址與保額</div>
+        <div id="locations"></div>
+        <button class="btn" id="addLocationBtn" type="button">新增標的物地址</button>
+        <p class="mini-note">金額可輸入 35000000 或 35,000,000；系統會自動加總火險保額並判斷適用的附加條款標的。</p>
+
+        <div class="section-title">自負額、天災與備註</div>
+        <div class="grid">
+          <label class="field wide">自負額
+            <textarea id="deductible">火險及其他附加險：每一事故為賠償金額之10%，最低NT$3萬元。</textarea>
+          </label>
+          <label class="field">天災險保額比例
+            <select id="natPercent"></select>
+          </label>
+          <label class="field">天災保險限額
+            <select id="natLimit"></select>
+          </label>
+          <label class="field">其他附加險比例
+            <select id="addonPercent"></select>
+          </label>
+          <label class="field wide">備註
+            <textarea id="remarks"></textarea>
+          </label>
+        </div>
+
+        <div class="section-title">附加險種與保額</div>
+        <table class="input-table">
+          <thead>
+            <tr><th style="width:46px">納入</th><th>附加險種</th><th style="width:170px">個別比例（選填）</th></tr>
+          </thead>
+          <tbody id="covers"></tbody>
+        </table>
+        <button class="btn" id="addCoverBtn" type="button" style="margin-top:8px">新增附加險種</button>
+        <p class="mini-note">個別比例不用每列選；留「依上方設定」即可。只有某個附加險比例不同時，再於該列改成指定比例。</p>
+
+        <div class="section-title">SB 附加條款</div>
+        <div class="toolbar">
+          <button class="btn" id="recommendBtn" type="button">依保額自動建議</button>
+          <button class="btn" id="selectAllClausesBtn" type="button">全選</button>
+          <button class="btn" id="clearClausesBtn" type="button">清空條款</button>
+          <button class="btn" id="addCustomClauseBtn" type="button">新增自訂條款</button>
+        </div>
+        <div class="clause-box" id="clauseBox"></div>
+        <div id="customClauseBox" style="margin-top:8px"></div>
+      </div>
+    </section>
+
+    <section class="preview-shell">
+      <div class="panel-header print-actions">
+        <span>OUTPUT：報價單預覽</span>
+        <span>可列印成 PDF</span>
+      </div>
+      <div class="quote" id="quotePreview">
+        <div class="empty">填完左側資料後，按「產生報價單」。</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SB_CLAUSES = [{"code": "SB001", "title": "重置成本附加條款(REPLACEMENT COST CLAUSE)", "applicability": "重置成本條款適用之標的物以建築物、營業裝修、機器設備以及營業生財為主 (僅投保裝修者不宜適用)，而具有中央處理系統之電子設備以投保電子設備保險為原則。 / 重置成本條款以建築物、營業裝修、機器設備以及營業生財為主 (僅投保裝修者不宜適用)，而具有中央處理系統之電子設備以投保電子設備保險為原則", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": false, "note": ""}, {"code": "SB002", "title": "80 %共保附加條款( 80 % CO-INSURANCE CLAUSE )", "applicability": "以貨物以外之財產為限，至於貨物部份以預約保險方式處理之 以保險標的物價值之 80%作為保險金額，保險金額如未達保險標的物價值之 80%者，仍受到低額保險比例分攤之約束。 加保附加險者，亦與火險相同適用同一共保比例。 竊盜險不適用本條款。 適用本條款時，原則上仍應鼓勵被保險人以足額投保。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": false, "note": "文字載明貨物/存貨以外；文字載明貨物以預約保險處理"}, {"code": "SB003", "title": "實損實賠保險附加條款( FIRST LOSS INSURANCE CLAUSE )", "applicability": "", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": "未找到適用之標的物段落"}, {"code": "SB004", "title": "保險金額自動增加附加條款(AUTOMATIC CAPITAL ADDITIONS CLAUSE)", "applicability": "以建築物、營業裝修、機器設備或營業生財為準，至於貨物 則以預約保險方式處理即可克服貨物保額增減不定之狀況。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": false, "note": "文字載明貨物以預約保險處理"}, {"code": "SB005", "title": "保險金額自動恢復附加條款( AUTOMATIC REINSTATEMENT CLAUSE )", "applicability": "", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": "未找到適用之標的物段落"}, {"code": "SB008", "title": "暫時外移附加條款 ( OFF PREMISES CLAUSE )", "applicability": "", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": "未找到適用之標的物段落"}, {"code": "SB009", "title": "預付賠款附加條款( PAYMENTS ON ACCOUNT CLAUSE )", "applicability": "無任何限制。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": "無限制，預設適用全部標的物"}, {"code": "SB010", "title": "建築物外部設備附加條款 ( OUTBUILDING CLAUSE )", "applicability": "不動產及裝修。", "建築物": true, "營業生財": false, "營業裝修": true, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB011", "title": "擴大承保處所附加條款 ( PREMISES CLAUSE )", "applicability": "建築物及裝修以外之標的物適用本條款，但置存於庭院內或露天之財物因危險性質不同，仍應依火災保險費率規章費率核定辦法核定費率，並另行估算金額 投保。", "建築物": false, "營業生財": true, "營業裝修": false, "機器設備": true, "存貨": true, "note": "文字載明建築物及裝修以外"}, {"code": "SB012", "title": "內部遷移附加條款 ( INTERNAL REMOVAL CLAUSE )", "applicability": "建築物及營業裝修以外之標的物。", "建築物": false, "營業生財": true, "營業裝修": false, "機器設備": true, "存貨": true, "note": "文字載明建築物及裝修以外"}, {"code": "SB013", "title": "改建與修復附加條款( ALTERATIONS AND REPAIRS CLAUSE )", "applicability": "貨物以外之標的物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": false, "note": "文字載明貨物/存貨以外"}, {"code": "SB014", "title": "拋棄代位求償權附加條款 ( WAIVER OF SUBROGATION RIGHTS CLAUSE )", "applicability": "被保險人之關係企業或業務上經營管理上有關係之人。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB015", "title": "車輛裝載物附加條款 ( VEHICLE LOAD CLAUSE )", "applicability": "貨物", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB006", "title": "專業費用附加條款(PROFESSIONAL FEES CLAUSE)", "applicability": "建築物、營業裝修、機器設備。", "建築物": true, "營業生財": false, "營業裝修": true, "機器設備": true, "存貨": false, "note": ""}, {"code": "SB007", "title": "殘餘物清除費用附加條款(DEBRIS REMOVAL CLAUSE)", "applicability": "建築物、營業生財、營業裝修、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB016", "title": "理賠準備費用附加條款(CLAIMS PREPARATION COSTS CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。 準備或証明理賠金額所實際發生必要且合理之費用。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB017", "title": "建築物拆除及建築費用增加附加條款(DEMOLITION AND INCREASED COST OF CONSTRUCTION CLAUSE)", "applicability": "建築物。 為執行政府法令規定，於重建、重置或修復保險標的物所發生之額外費用。 / 除貨物外之其他保險標的物，包括建築物、營業裝修、營業生財、機器設備。 列名式之合理趕工費用。 / 除貨物外之其他保險標的物，包括建築物、營業裝修、營業生財、機器設備。 本附加條款所載之額外費用。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB020", "title": "消防費用附加條款(FIRE BRIGADE CHARGES AND EXTINGUISHING EXPENSE CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。 消防費用及消防器材費用。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB021", "title": "鎖鑰費用附加條款(LOCKS AND KEYS CLAUSE)", "applicability": "營業裝修、營業生財。 複製鎖鑰的費用。 開啟保險箱或房間的費用。", "建築物": false, "營業生財": true, "營業裝修": true, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB022", "title": "其他動產附加條款(ALL OTHER CONTENTS CLAUSE)", "applicability": "本附加條款所載之動產。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB023", "title": "小額賠款附加條款(APPRAISEMENT CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB024", "title": "比例分攤附加條款(AVERAGE PENALTY RELIEF CLAUSE)", "applicability": "除貨物外之其他保險標的物，包括建築物、營業裝修、營業生財、機器設備。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB025", "title": "商標附加條款(適用於高級名牌或商標之貨物) (BRAND OR TRADEMARK CLAUSE)", "applicability": "貨物。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB026", "title": "商標附加條款(適用於一般貨物) (BRANDED GOODS CLAUSE)", "applicability": "貨物。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB027", "title": "被保險人照顧、監管及控制標的物範圍附加條款(CARE, CUSTODY AND CONTROL COVERAGE CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB028", "title": "溫度控制系統損壞附加條款(CHANGES IN A TEMPERATURE CONTROLLED ENVIRONMENT CLAUSE)", "applicability": "貨物。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB029", "title": "契約承購者附加條款(CONTRACTING PURCHASER CLAUSE)", "applicability": "建築物。", "建築物": true, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB030", "title": "電腦系統當機、故障或操作失當附加條款(DATA PROCESSING/MEDIA FAILURE BREAKDOWN OR MALFUNCTION OF THE PROCESSING", "applicability": "本條款僅適用於保險標的物為個人電腦(不含伺服器)者。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": "未列特定類別但泛稱財物/標的物，預設全部適用"}, {"code": "SB031", "title": "地震、颱風及洪水—單獨損失附加條款(EARTHQUAKE AND FLOOD – SINGLE LOSS CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB032", "title": "電器設備損壞附加條款(ELECTRICAL INJURY CLAUSE)", "applicability": "機器設備(電器設備)。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": false, "note": ""}, {"code": "SB033", "title": "被保險人員工所有動產附加條款(EMPLOYEES’ PERSONAL EFFECTS CLAUSE)", "applicability": "置存於保險標的物所在地址之受雇人之個人財物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": "未列特定類別但泛稱財物/標的物，預設全部適用"}, {"code": "SB034", "title": "改建修復責任附加條款(INDEPENDENT CONTRACTOR’S LIABILITY CLAUSE)", "applicability": "除貨物外之其他保險標的物，包括建築物、營業裝修、營業生財、機器設備。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB035", "title": "出租人責任附加條款(LANDLORD LIABILITY CLAUSE)", "applicability": "建築物、營業裝修、營業生財。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB036", "title": "法令變更自動生效附加條款(LIBERALISATION CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB037", "title": "機械設備操作附加條款(LIFT, HOIST, PLANT & MACHINERY CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB038", "title": "責任解除附加條款(甲型)(LOSS PAYABLE CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB039", "title": "責任解除附加條款(乙型)(LOSS PAYABLE CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB040", "title": "貨物水險(50/50)附加條款(MARINE CARGO INSURANCE (50/50 CLAUSE)", "applicability": "機器設備、貨物。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB041", "title": "小型工程附加條款(MINOR WORKS CLAUSE)", "applicability": "除貨物外之其他保險標的物，包括建築物、營業裝修、營業生財、機器設備。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB042", "title": "新取得財產附加條款(NEW ACQUISITIONS CLAUSE)", "applicability": "除貨物外之其他新取得之保險標的物，包括建築物、營業裝修、營業生財、機器設備。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB043", "title": "無控制權附加條款(NO CONTROL CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB044", "title": "無法進入承保處所鄰近財產附加條款(一般營業處所適用)(PREMISES IN VICINITY 「PREVENTION OF ACCESS」CLAUSE)", "applicability": "營業中斷之實際損失。 恢復營業所生之費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB045", "title": "無法進入承保處所鄰近財產附加條款(商業中心適用)(PREMISES IN VICINITY CLAUSE)", "applicability": "營業中斷之實際損失。 恢復營業所生之費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB046", "title": "續保保費調整附加條款(PREMIUM ADJUSTMENT CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB047", "title": "陸上運送附加條款(PROPERTY IN TRANSIT CLAUSE)", "applicability": "機器設備、貨物。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB048", "title": "儲存於非承保處所附加條款(PROPERTY IN OFF-SITE STORAGE CLAUSE)", "applicability": "貨物(不包括半成品、在製品或儲存於製造商、經銷商或供應商處所之財產)。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB049", "title": "公權力附加條款(PUBLIC AUTHORITIES CLAUSE)", "applicability": "除貨物外之其他保險標的物，包括建築物、營業裝修、營業生財、機器設備。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB050", "title": "特殊分類附加條款(SINGLE CLASSIFICATION CLAUSE)", "applicability": "貨物。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB051", "title": "單一機器或設備附加條款(SINGLE MACHINE OR UNIT CLAUSE)", "applicability": "機器設備。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": false, "note": ""}, {"code": "SB052", "title": "擴大承保供應商/顧客處所附加條款(SUPPLIERS’/CUSTOMERS’ PREMISES EXTENSION(S) CLAUSE)", "applicability": "營業中斷之實際損失。 恢復營業所生之費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB053", "title": "他人使用保險標的物附加條款(TENANTS CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB054", "title": "標題附加條款(TITLES OF PARAGRAPHS CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB055", "title": "未受損之附屬或周邊設備附加條款(UNDAMAGED ANCILLARY AND/OR PERIPHERAL EQUIPMENT CLAUSE)", "applicability": "建築物、機器設備。", "建築物": true, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": false, "note": ""}, {"code": "SB056", "title": "未受損之建築物附加條款(UNDAMAGED BUILDINGS & FOUNDATIONS CLAUSE)", "applicability": "建築物、營業裝修。", "建築物": true, "營業生財": false, "營業裝修": true, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB057", "title": "基層保險附加條款(UNDERLYING INSURANCE CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB058", "title": "被保險人控制及停車處所之車輛附加條款(VEHICLES ON INSURED’S CONTROL AND CAR PARK CLAUSE)", "applicability": "被保險人所控制或停放承保處所之第三人機動車輛。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB059", "title": "工人附加條款(WORKMEN CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB060", "title": "新增機器設備申報附加條款(SPECIAL CONDITIONS CONCERNING DECLARATION OF NEW VALUE)", "applicability": "機器設備。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": false, "note": ""}, {"code": "SB061", "title": "公用事業附加條款(財產保險適用)(SERVICE INTERRUPTION CLAUSE)(for PD)", "applicability": "建築物、機器設備、營業生財、營業裝修、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB062", "title": "公用事業附加條款(營業中斷險適用) (SERVICE INTERRUPTION CLAUSE)(for BI)", "applicability": "營業毛利減非持續費用。 持續費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB063", "title": "內部依存附加條款(營業中斷險適用) (INTERDEPENDENCY CLAUSE)(for BI)", "applicability": "營業毛利減非持續費用。 持續費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB064", "title": "政府命令附加條款(營業中斷險適用) (NTERRUPTION BY CIVIL OR MILITARY AUTHORITY CLAUSE)(for BI)", "applicability": "營業毛利減非持續費用。 持續費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB065", "title": "保險標的物無法進出附加條款(營業中斷險適用) (INGRESS/EGRESS CLAUSE)(for BI)", "applicability": "營業毛利減非持續費用。 持續費用。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": ""}, {"code": "SB066", "title": "電腦資料及設備危險除外不保附加條款(ELECTRONIC DATA AND EQUIPMENT PERILS EXCLUSION CLAUSE)", "applicability": "", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": false, "note": "未找到適用之標的物段落"}, {"code": "SB067", "title": "錯誤遺漏附加條款(ERRORS OR OMISSIONS CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB068", "title": "汽車修理廠託修車輛附加條款(CARE, CUSTODY AND CONTROL OF CUSTOMER’S VEHICLES)", "applicability": "貨物(汽車修理廠之託修車輛)。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB069", "title": "金屬鎔液溢出附加條款(MOLTEN METAL SPILLAGE CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB070", "title": "保險標的物敘述附加條款(DESCRIPTION OF PROPERTY INSURED CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB071", "title": "委外加工附加條款(WORK IN PROCESS – OUTSOURCED CLAUSE)", "applicability": "貨物（含原物料、半成品、在製品、置存於製造商之財產）。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB072", "title": "竊盜保全附加條款(SECURITY CONDITION CLAUSE)", "applicability": "建築物、營業裝修、營業生財、機器設備、貨物。", "建築物": true, "營業生財": true, "營業裝修": true, "機器設備": true, "存貨": true, "note": ""}, {"code": "SB073", "title": "受委託代工貨物附加條款(CONSIGNED STOCK CLAUSE)", "applicability": "貨物(受委託代工貨物)。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": false, "存貨": true, "note": ""}, {"code": "SB074", "title": "試車/測試附加條款(PLANT & PROPERTY TESTING AND COMMISSIONING CLAUSE)", "applicability": "機器設備。", "建築物": false, "營業生財": false, "營業裝修": false, "機器設備": true, "存貨": false, "note": ""}];
+    const propertyMap = [
+      { key: "建築物", label: "建築物", field: "building" },
+      { key: "營業裝修", label: "營業裝修", field: "decoration" },
+      { key: "機器設備", label: "機器設備", field: "machinery" },
+      { key: "營業生財", label: "營業生財", field: "equipment" },
+      { key: "存貨", label: "貨物", field: "goods" }
+    ];
+    const defaultCovers = [
+      "地震險",
+      "颱風及洪水險",
+      "罷工、暴動、民眾騷擾、惡意破壞行為險",
+      "自動消防裝置滲漏險",
+      "竊盜險",
+      "第三人意外責任險",
+      "水漬險",
+      "爆炸險",
+      "航空器墜落、機動車輛碰撞險",
+      "營業中斷險(製造業適用)",
+      "營業中斷險(非製造業適用)",
+      "煙燻險",
+      "地層下陷、滑動或山崩險",
+      "租金損失險",
+      "恐怖主義險"
+    ];
+    const els = {};
+    const moneyFields = ["building", "decoration", "machinery", "equipment", "goods"];
+    const fieldMeta = {
+      building: { label: "建築物", key: "建築物", aliases: ["建築物", "建物", "房屋"] },
+      decoration: { label: "營業裝修", key: "營業裝修", aliases: ["營業裝修", "裝修"] },
+      machinery: { label: "機器設備", key: "機器設備", aliases: ["機器設備", "機器", "設備"] },
+      equipment: { label: "營業生財", key: "營業生財", aliases: ["營業生財", "生財"] },
+      goods: { label: "貨物", key: "存貨", aliases: ["貨物", "存貨", "零件", "配件"] }
+    };
+
+    function byId(id) { return document.getElementById(id); }
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+    }
+    function moneyValue(value) {
+      const n = Number(String(value ?? "").replace(/[^0-9.-]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    }
+    function fmtMoney(value) {
+      const n = moneyValue(value);
+      return n ? n.toLocaleString("zh-TW") : "";
+    }
+    function fieldAmountText(value) {
+      const amount = fmtMoney(value);
+      if (!amount) return "";
+      const suffix = [...plain(value).matchAll(/[（(]([^（）()]*)[）)]/g)]
+        .map(match => match[1])
+        .filter(text => text.includes("含"))
+        .map(text => `(${escapeHtml(text)})`)
+        .join("");
+      return amount + suffix;
+    }
+    function fmtAmountText(value) {
+      const text = plain(value);
+      if (!text) return "";
+      if (/^[0-9,]+$/.test(text)) return fmtMoney(text);
+      return text.replace(/[0-9][0-9,]*/g, match => {
+        const cleaned = match.replace(/,/g, "");
+        return cleaned.length >= 4 ? Number(cleaned).toLocaleString("zh-TW") : match;
+      });
+    }
+    function cleanClauseTitle(value) {
+      return plain(value)
+        .replace(/\s*[（(][^（）()]*[A-Za-z][^（）()]*[）)]/g, "")
+        .replace(/\s*[（(][^（）()]*[A-Za-z].*$/g, "")
+        .trim();
+    }
+    function plain(value) { return String(value ?? "").trim(); }
+
+    function initPercentOptions() {
+      const percent = byId("natPercent");
+      const limit = byId("natLimit");
+      const addon = byId("addonPercent");
+      for (let p = 10; p <= 100; p += 10) {
+        percent.insertAdjacentHTML("beforeend", `<option value="${p}">火險保額 ${p}%</option>`);
+        limit.insertAdjacentHTML("beforeend", `<option value="${p}">火險保額 ${p}%</option>`);
+        addon.insertAdjacentHTML("beforeend", `<option value="${p}">火險保額 ${p}%</option>`);
+      }
+      percent.value = "100";
+      limit.value = "100";
+      addon.value = "50";
+    }
+
+    function percentSelectHtml(value = "") {
+      const selected = value || "";
+      let html = `<option value="" ${selected === "" ? "selected" : ""}>依上方設定</option>`;
+      for (let p = 10; p <= 100; p += 10) {
+        html += `<option value="${p}" ${String(p) === String(selected) ? "selected" : ""}>火險保額 ${p}%</option>`;
+      }
+      return html;
+    }
+
+    function renderCovers() {
+      byId("covers").innerHTML = defaultCovers.map((name, idx) => `
+        <tr>
+          <td style="text-align:center"><input type="checkbox" class="cover-on" data-idx="${idx}" ${idx === 0 ? "checked" : ""}></td>
+          <td><input class="cover-name" data-idx="${idx}" value="${escapeHtml(name)}"></td>
+          <td><select class="cover-amount" data-idx="${idx}">${percentSelectHtml("")}</select></td>
+        </tr>
+      `).join("");
+    }
+
+    function addCover(name = "", amount = "") {
+      byId("covers").insertAdjacentHTML("beforeend", `
+        <tr>
+          <td style="text-align:center"><input type="checkbox" class="cover-on" checked></td>
+          <td><input class="cover-name" value="${escapeHtml(name)}" placeholder="自行輸入險種"></td>
+          <td><select class="cover-amount">${percentSelectHtml(amount)}</select></td>
+        </tr>
+      `);
+    }
+
+    function locationTemplate(index, data = {}) {
+      const repairDisplay = byId("industry").value === "汽車業" ? "" : "display:none";
+      return `
+        <div class="location-block" data-location>
+          <div class="location-head">
+            <span>標的物 ${index + 1}</span>
+            <button class="btn danger remove-location" type="button">刪除</button>
+          </div>
+          <div class="location-body">
+            <div class="grid">
+              <label class="field">名稱 / 代號
+                <input data-field="siteName" value="${escapeHtml(data.siteName || "")}" placeholder="例：服務廠A">
+              </label>
+              <label class="field repair-field" style="${repairDisplay}">是否有修理廠
+                <select data-field="repairShop">
+                  <option ${data.repairShop !== "是" ? "selected" : ""}>否</option>
+                  <option ${data.repairShop === "是" ? "selected" : ""}>是</option>
+                </select>
+              </label>
+              <label class="field wide">標的物地址
+                <input data-field="address" value="${escapeHtml(data.address || "")}">
+              </label>
+              <label class="field">使用性質
+                <input data-field="usageNature" value="${escapeHtml(data.usageNature || "")}" placeholder="例：辦公室、堆棧、倉庫">
+              </label>
+              <label class="field wide">建築結構</label>
+              <textarea class="wide" data-field="structure" placeholder="手寫內容可打在這裡">${escapeHtml(data.structure || "")}</textarea>
+            </div>
+            <div class="money-grid" style="margin-top:10px">
+              ${moneyFields.map(field => {
+                const label = fieldMeta[field].label;
+                return `<label class="field">${label}<input data-field="${field}" value="${escapeHtml(data[field] || "")}" placeholder="保額"></label>`;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function addLocation(data = {}) {
+      const box = byId("locations");
+      box.insertAdjacentHTML("beforeend", locationTemplate(box.querySelectorAll("[data-location]").length, data));
+      updateLocationNumbers();
+      syncIndustryFields();
+    }
+
+    function updateLocationNumbers() {
+      byId("locations").querySelectorAll("[data-location]").forEach((block, idx) => {
+        block.querySelector(".location-head span").textContent = `標的物 ${idx + 1}`;
+      });
+    }
+
+    function syncIndustryFields() {
+      const show = byId("industry").value === "汽車業";
+      document.querySelectorAll(".repair-field").forEach(el => el.style.display = show ? "" : "none");
+    }
+
+    function readLocations() {
+      return [...byId("locations").querySelectorAll("[data-location]")].map(block => {
+        const obj = {};
+        block.querySelectorAll("[data-field]").forEach(input => obj[input.dataset.field] = input.value);
+        return obj;
+      });
+    }
+
+    function detectIncludedFields(text, sourceField) {
+      const sourceLabel = fieldMeta[sourceField].label;
+      const matches = [...plain(text).matchAll(/[（(]([^（）()]*)[）)]/g)];
+      const hits = [];
+      for (const match of matches) {
+        const content = match[1];
+        if (!content.includes("含")) continue;
+        for (const field of moneyFields) {
+          if (field === sourceField) continue;
+          if (fieldMeta[field].aliases.some(alias => content.includes(alias))) {
+            hits.push({ field, key: fieldMeta[field].key, note: `含於${sourceLabel}` });
+          }
+        }
+      }
+      return hits;
+    }
+
+    function inclusionNotes(loc) {
+      const notes = {};
+      for (const field of moneyFields) notes[field] = [];
+      for (const sourceField of moneyFields) {
+        if (moneyValue(loc[sourceField]) <= 0) continue;
+        for (const hit of detectIncludedFields(loc[sourceField], sourceField)) {
+          if (!notes[hit.field].includes(hit.note)) notes[hit.field].push(hit.note);
+        }
+      }
+      return notes;
+    }
+
+    function displayPropertyCell(loc, field) {
+      const amount = fieldAmountText(loc[field]);
+      const notes = inclusionNotes(loc)[field] || [];
+      if (amount && notes.length) return `${amount}<br><small>${notes.map(escapeHtml).join("<br>")}</small>`;
+      if (amount) return amount;
+      return notes.map(escapeHtml).join("<br>");
+    }
+
+    function selectedPropertyKeys(locations = readLocations()) {
+      const active = new Set();
+      for (const loc of locations) {
+        for (const item of propertyMap) {
+          if (moneyValue(loc[item.field]) > 0) active.add(item.key);
+        }
+        for (const sourceField of moneyFields) {
+          for (const hit of detectIncludedFields(loc[sourceField], sourceField)) {
+            active.add(hit.key);
+          }
+        }
+      }
+      return active;
+    }
+
+    function renderClauseSelector(mode = "recommend") {
+      const active = selectedPropertyKeys();
+      const shouldCheck = clause => {
+        if (mode === "all") return true;
+        if (mode === "none") return false;
+        return propertyMap.some(item => active.has(item.key) && clause[item.key]);
+      };
+      byId("clauseBox").innerHTML = SB_CLAUSES.map(clause => `
+        <label class="clause-row">
+          <input type="checkbox" class="clause-check" value="${escapeHtml(clause.code)}" ${shouldCheck(clause) ? "checked" : ""}>
+          <span>${escapeHtml(clause.code)}</span>
+          <span>${escapeHtml(cleanClauseTitle(clause.title))}</span>
+        </label>
+      `).join("");
+    }
+
+    function readCovers() {
+      return [...document.querySelectorAll("#covers tr")].map(row => {
+        return {
+          on: row.querySelector(".cover-on").checked,
+          name: plain(row.querySelector(".cover-name").value),
+          amount: plain(row.querySelector(".cover-amount").value)
+        };
+      }).filter(c => c.on && c.name);
+    }
+
+    function selectedClauses() {
+      const selected = new Set([...document.querySelectorAll(".clause-check:checked")].map(el => el.value));
+      const standardClauses = SB_CLAUSES.filter(c => selected.has(c.code));
+      const customClauses = [...document.querySelectorAll(".custom-clause-input")]
+        .map(input => plain(input.value))
+        .filter(Boolean)
+        .map(title => ({ title }));
+      return standardClauses.concat(customClauses);
+    }
+
+    function addCustomClause(value = "") {
+      byId("customClauseBox").insertAdjacentHTML("beforeend", `
+        <div class="custom-clause-row" style="display:grid;grid-template-columns:1fr 52px;gap:8px;margin-top:8px">
+          <input class="custom-clause-input" value="${escapeHtml(value)}" placeholder="輸入自訂附加條款名稱">
+          <button class="btn danger remove-custom-clause" type="button">X</button>
+        </div>
+      `);
+    }
+
+    function isNaturalDisasterCover(name) {
+      return name.includes("颱風") || name.includes("洪水") || name.includes("地震");
+    }
+
+    function otherAddonRows(covers, total, addonPercent) {
+      const others = covers.filter(c => !isNaturalDisasterCover(c.name));
+      if (!others.length) return `<tr><td style="font-weight:700">其他附加險比例</td><td>火險保額 ${addonPercent}%：${fmtMoney(total * Number(addonPercent) / 100)}</td></tr>`;
+      const hasDifferent = others.some(c => c.amount && String(c.amount) !== String(addonPercent));
+      if (!hasDifferent) {
+        return `<tr><td style="font-weight:700">其他附加險比例</td><td>火險保額 ${addonPercent}%：${fmtMoney(total * Number(addonPercent) / 100)}</td></tr>`;
+      }
+      const groups = new Map();
+      for (const cover of others) {
+        const percent = cover.amount || addonPercent;
+        if (!groups.has(percent)) groups.set(percent, []);
+        groups.get(percent).push(cover.name);
+      }
+      const sortedGroups = [...groups.entries()].sort((a, b) => {
+        if (b[1].length !== a[1].length) return b[1].length - a[1].length;
+        if (String(a[0]) === String(addonPercent)) return -1;
+        if (String(b[0]) === String(addonPercent)) return 1;
+        return Number(b[0]) - Number(a[0]);
+      });
+      const [mainPercent, mainNames] = sortedGroups[0];
+      const exceptionNames = sortedGroups.slice(1).flatMap(([, names]) => names);
+      const exceptionRows = sortedGroups.slice(1).map(([percent, names]) => {
+        const amount = Math.round(total * Number(percent) / 100);
+        return `<tr><td style="font-weight:700">${escapeHtml(names.join("、"))}</td><td>火險保額 ${percent}%：${fmtMoney(amount)}</td></tr>`;
+      }).join("");
+      const mainAmount = Math.round(total * Number(mainPercent) / 100);
+      const mainLabel = exceptionNames.length
+        ? `除${escapeHtml(exceptionNames.join("、"))}外，其餘附加險種`
+        : "其餘附加險種";
+      return exceptionRows + `<tr><td style="font-weight:700">${mainLabel}</td><td>火險保額 ${mainPercent}%：${fmtMoney(mainAmount)}</td></tr>`;
+    }
+
+    function totalFireAmount(locations) {
+      return locations.reduce((sum, loc) => sum + locationSubtotal(loc), 0);
+    }
+
+    function locationSubtotal(loc) {
+      return moneyFields.reduce((s, f) => s + moneyValue(loc[f]), 0);
+    }
+
+    function renderQuote() {
+      const locations = readLocations();
+      const covers = readCovers();
+      const clauses = selectedClauses();
+      const total = totalFireAmount(locations);
+      const industry = plain(byId("industry").value);
+      const now = new Date();
+      const dateText = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")}`;
+      const natPercent = byId("natPercent").value;
+      const natLimit = byId("natLimit").value;
+      const addonPercent = byId("addonPercent").value;
+      const natAmount = Math.round(total * Number(natPercent) / 100);
+      const limitAmount = Math.round(total * Number(natLimit) / 100);
+      const repairCol = industry === "汽車業" ? `<th>是否有修理廠</th>` : "";
+      const addonRows = otherAddonRows(covers, total, addonPercent);
+
+      const subjectRows = locations.map((loc, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${escapeHtml(loc.siteName || "")}</td>
+          <td>${escapeHtml(loc.address || "")}</td>
+          <td>${escapeHtml(loc.usageNature || "")}</td>
+          <td style="text-align:right">${displayPropertyCell(loc, "building")}</td>
+          <td style="text-align:right">${displayPropertyCell(loc, "decoration")}</td>
+          <td style="text-align:right">${displayPropertyCell(loc, "machinery")}</td>
+          <td style="text-align:right">${displayPropertyCell(loc, "equipment")}</td>
+          <td style="text-align:right">${displayPropertyCell(loc, "goods")}</td>
+          ${industry === "汽車業" ? `<td>${escapeHtml(loc.repairShop || "否")}</td>` : ""}
+          <td style="text-align:right;font-weight:700">${fmtMoney(locationSubtotal(loc))}</td>
+          <td>${escapeHtml(loc.structure || "")}</td>
+        </tr>
+      `).join("");
+
+      byId("quotePreview").innerHTML = `
+        <div class="quote-title">
+          <div>
+            <h2>商業火災保險報價單</h2>
+          </div>
+          <div class="meta">
+            <div>製表日期：${dateText}</div>
+            <div>產業別：${escapeHtml(industry)}</div>
+          </div>
+        </div>
+
+        <h3>被保險人資訊</h3>
+        <div class="info-grid">
+          <div class="info-label">公司名稱</div><div>${escapeHtml(byId("companyName").value)}</div>
+          <div class="info-label">統一編號</div><div>${escapeHtml(byId("taxId").value)}</div>
+          <div class="info-label">代表人</div><div>${escapeHtml(byId("representative").value)}</div>
+          <div class="info-label">電話</div><div>${escapeHtml(byId("phone").value)}</div>
+          <div class="info-label">通訊地址</div><div style="grid-column: span 3">${escapeHtml(byId("mailingAddress").value)}</div>
+          <div class="info-label">保險期間</div><div style="grid-column: span 3">${escapeHtml(byId("insurancePeriod").value)}</div>
+        </div>
+
+        <h3>本保險契約所承保之危險事故</h3>
+        <table>
+          <tbody>
+            <tr><td>火災</td></tr>
+            <tr><td>爆炸引起之火災</td></tr>
+            <tr><td>閃電雷擊</td></tr>
+          </tbody>
+        </table>
+
+        <h3>標的物與保額</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:38px">#</th><th>名稱</th><th>標的物地址</th><th>使用性質</th>
+              <th>建築物</th><th>營業裝修</th><th>機器設備</th><th>營業生財</th><th>貨物</th>${repairCol}<th>小計</th><th>建築結構</th>
+            </tr>
+          </thead>
+          <tbody>${subjectRows || `<tr><td colspan="${industry === "汽車業" ? 12 : 11}">尚未輸入標的物</td></tr>`}</tbody>
+          <tfoot><tr><td colspan="${industry === "汽車業" ? 11 : 10}" style="text-align:right;font-weight:700">火險總保額</td><td style="font-weight:700;text-align:right">${fmtMoney(total)}</td></tr></tfoot>
+        </table>
+
+        <h3>自負額</h3>
+        <table>
+          <tbody>
+            <tr><td>${escapeHtml(byId("deductible").value).replace(/\n/g, "<br>")}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>天災保額</h3>
+        <table>
+          <tbody>
+            <tr><td>火險保額 ${natPercent}%：${fmtMoney(natAmount)}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>天災限額</h3>
+        <table>
+          <tbody>
+            <tr><td>火險保額 ${natLimit}%：${fmtMoney(limitAmount)}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>附加險</h3>
+        <table>
+          <tbody>
+            ${addonRows}
+          </tbody>
+        </table>
+
+        <h3>備註</h3>
+        <table>
+          <tbody>
+            <tr><td>${escapeHtml(byId("remarks").value).replace(/\n/g, "<br>")}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>SB 附加條款</h3>
+        <ol class="terms-list">
+          ${clauses.map(c => `<li>${escapeHtml(cleanClauseTitle(c.title))}</li>`).join("") || "<li>尚未選擇附加條款</li>"}
+        </ol>
+      `;
+      byId("saveStatus").textContent = "已產生";
+    }
+
+    function generateQuote() {
+      if (!document.querySelector(".clause-check:checked")) {
+        renderClauseSelector("recommend");
+      }
+      renderQuote();
+    }
+
+    function fillSample() {
+      byId("industry").value = "汽車業";
+      byId("companyName").value = "範例汽車服務股份有限公司";
+      byId("taxId").value = "00000000";
+      byId("representative").value = "王小明";
+      byId("phone").value = "02-0000-0000";
+      byId("mailingAddress").value = "臺北市範例區測試路100號";
+      byId("insurancePeriod").value = "2026/07/01 中午12時起至 2027/07/01 中午12時止";
+      byId("locations").innerHTML = "";
+      addLocation({
+        siteName: "範例-服務廠A",
+        address: "臺北市範例區測試路100號1樓及2樓",
+        usageNature: "辦公室及維修服務區",
+        decoration: "35000000",
+        equipment: "400000",
+        goods: "16000000",
+        repairShop: "是",
+        structure: "鋼筋混凝土造平屋頂地上5層樓地下1層樓 特二等建築"
+      });
+      addLocation({
+        siteName: "範例-服務廠B",
+        address: "臺北市範例區示範街200號(全棟)",
+        usageNature: "倉庫",
+        decoration: "38000000",
+        machinery: "1100000",
+        goods: "17500000",
+        repairShop: "是",
+        structure: "鋼骨造鐵皮屋頂地上3層樓地下1層樓 頭等建築"
+      });
+      byId("remarks").value = "本保單颱風及洪水險對於室外廣告設備及招牌所遭受之損失及滅失，亦負賠償責任。";
+      document.querySelectorAll(".cover-on").forEach(el => el.checked = true);
+      renderClauseSelector("recommend");
+      renderQuote();
+    }
+
+    function clearAll() {
+      ["companyName", "taxId", "representative", "phone", "mailingAddress", "insurancePeriod", "remarks"].forEach(id => byId(id).value = "");
+      byId("locations").innerHTML = "";
+      addLocation();
+      document.querySelectorAll(".cover-on").forEach((el, idx) => el.checked = idx === 0);
+      document.querySelectorAll(".cover-amount").forEach(el => el.value = "");
+      renderClauseSelector("none");
+      byId("customClauseBox").innerHTML = "";
+      byId("quotePreview").innerHTML = `<div class="empty">填完左側資料後，按「產生報價單」。</div>`;
+      byId("saveStatus").textContent = "已清空";
+    }
+
+    document.addEventListener("click", e => {
+      if (e.target.matches(".remove-location")) {
+        e.target.closest("[data-location]").remove();
+        updateLocationNumbers();
+      }
+      if (e.target.matches(".remove-custom-clause")) {
+        e.target.closest(".custom-clause-row").remove();
+      }
+    });
+    byId("industry").addEventListener("change", syncIndustryFields);
+    byId("addLocationBtn").addEventListener("click", () => addLocation());
+    byId("addCoverBtn").addEventListener("click", () => addCover());
+    byId("addCustomClauseBtn").addEventListener("click", () => addCustomClause());
+    byId("recommendBtn").addEventListener("click", () => renderClauseSelector("recommend"));
+    byId("selectAllClausesBtn").addEventListener("click", () => renderClauseSelector("all"));
+    byId("clearClausesBtn").addEventListener("click", () => renderClauseSelector("none"));
+    byId("generateBtn").addEventListener("click", generateQuote);
+    byId("printBtn").addEventListener("click", () => { generateQuote(); window.print(); });
+    byId("sampleBtn").addEventListener("click", fillSample);
+    byId("clearBtn").addEventListener("click", clearAll);
+
+    initPercentOptions();
+    renderCovers();
+    addLocation();
+    renderClauseSelector("none");
+  </script>
+</body>
+</html>
