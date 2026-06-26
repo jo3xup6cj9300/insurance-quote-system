@@ -484,15 +484,6 @@
           </div>
         </div>
 
-        <h3>附件</h3>
-        <table>
-          <tbody>
-            <tr><td style="width:120px;font-weight:700">保險公司</td><td></td></tr>
-            <tr><td style="font-weight:700">保險費(NT$)</td><td></td></tr>
-            <tr><td style="font-weight:700">佣金率</td><td></td></tr>
-          </tbody>
-        </table>
-
         <h3>被保險人資訊</h3>
         <div class="info-grid">
           <div class="info-label">公司名稱</div><div>${escapeHtml(byId("companyName").value)}</div>
@@ -525,6 +516,15 @@
 
         <h3>備註</h3>
         <table><tbody><tr><td>${escapeHtml(byId("remarks").value).replace(/\n/g, "<br>")}</td></tr></tbody></table>
+
+        <h3>保險公司報價</h3>
+        <table>
+          <tbody>
+            <tr><td style="width:120px;font-weight:700">保險公司</td><td></td></tr>
+            <tr><td style="font-weight:700">保險費(NT$)</td><td></td></tr>
+            <tr><td style="font-weight:700">佣金率</td><td></td></tr>
+          </tbody>
+        </table>
       `;
       byId("saveStatus").textContent = "已產生";
     }

@@ -740,15 +740,6 @@
           </div>
         </div>
 
-        <h3>附件</h3>
-        <table>
-          <tbody>
-            <tr><td style="width:120px;font-weight:700">保險公司</td><td></td></tr>
-            <tr><td style="font-weight:700">保險費(NT$)</td><td></td></tr>
-            <tr><td style="font-weight:700">佣金率</td><td></td></tr>
-          </tbody>
-        </table>
-
         <h3>被保險人資訊</h3>
         <div class="info-grid">
           <div class="info-label">公司名稱</div><div>${escapeHtml(byId("companyName").value)}</div>
@@ -819,6 +810,15 @@
         <ol class="terms-list">
           ${clauses.map(c => `<li>${escapeHtml(cleanClauseTitle(c.title))}</li>`).join("") || "<li>尚未選擇附加條款</li>"}
         </ol>
+
+        <h3>保險公司報價</h3>
+        <table>
+          <tbody>
+            <tr><td style="width:120px;font-weight:700">保險公司</td><td></td></tr>
+            <tr><td style="font-weight:700">保險費(NT$)</td><td></td></tr>
+            <tr><td style="font-weight:700">佣金率</td><td></td></tr>
+          </tbody>
+        </table>
       `;
       byId("saveStatus").textContent = "已產生";
     }
