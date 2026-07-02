@@ -206,25 +206,39 @@
             <label class="field wide">通訊地址<input id="f-insuredMailingAddress"></label>
           </div>
         </div>
+        <div class="section-title">承保內容</div>
+        <div class="clause-box" id="f-perilBox">
+          <label class="check-row"><input type="checkbox" class="f-peril-check" value="火災" checked><span>火災</span></label>
+          <label class="check-row"><input type="checkbox" class="f-peril-check" value="爆炸引起之火災" checked><span>爆炸引起之火災</span></label>
+          <label class="check-row"><input type="checkbox" class="f-peril-check" value="閃電雷擊" checked><span>閃電雷擊</span></label>
+        </div>
         <div class="section-title">標的物地址與保額</div>
         <div id="f-locations"></div>
         <button class="btn" id="f-addLocationBtn" type="button" style="margin-top:8px">新增標的物地址</button>
         <p class="mini-note">金額可輸入 35000000 或 35,000,000；系統自動加總火險保額並建議 SB 條款。</p>
+        <div class="section-title">附加險種與保額</div>
+        <p class="mini-note">天災附加險可分別設定比例；若地震險與颱風及洪水險比例相同，輸出會自動合併為一列。</p>
+        <table class="input-table">
+          <thead><tr><th style="width:46px">納入</th><th>天災附加險</th><th style="width:170px">個別比例</th></tr></thead>
+          <tbody id="f-natural-covers"></tbody>
+        </table>
+        <table class="input-table" style="margin-top:10px">
+          <thead><tr><th style="width:46px">納入</th><th>其餘附加險</th><th style="width:170px">個別比例</th></tr></thead>
+          <tbody id="f-covers"></tbody>
+        </table>
+        <div class="toolbar" style="margin-top:8px">
+          <button class="btn" id="f-addCoverBtn" type="button">新增自訂附加險種</button>
+          <button class="btn danger" id="f-clearCoversBtn" type="button">清空附加險</button>
+        </div>
+        <p class="mini-note">「依天災設定」代表套用下方天災險保額比例；其餘附加險的「依上方設定」代表套用其他附加險比例。</p>
         <div class="section-title">自負額、天災與備註</div>
         <div class="grid">
           <label class="field wide">自負額<textarea id="f-deductible">火險及其他附加險：每一事故為賠償金額之10%，最低NT$3萬元。</textarea></label>
           <label class="field">天災險保額比例<select id="f-natPercent"></select></label>
           <label class="field">天災保險限額<select id="f-natLimit"></select></label>
-          <label class="field">其他附加險比例<select id="f-addonPercent"></select></label>
+          <label class="field">其餘附加險比例<select id="f-addonPercent"></select></label>
           <label class="field wide">備註<textarea id="f-remarks"></textarea></label>
         </div>
-        <div class="section-title">附加險種與保額</div>
-        <table class="input-table">
-          <thead><tr><th style="width:46px">納入</th><th>附加險種</th><th style="width:170px">個別比例（選填）</th></tr></thead>
-          <tbody id="f-covers"></tbody>
-        </table>
-        <button class="btn" id="f-addCoverBtn" type="button" style="margin-top:8px">新增附加險種</button>
-        <p class="mini-note">個別比例留「依上方設定」即可；只有某附加險比例不同時再調整。</p>
         <div class="section-title">SB 附加條款</div>
         <div class="toolbar">
           <button class="btn" id="f-recommendBtn" type="button">依保額自動建議</button>
@@ -348,6 +362,7 @@
           <button class="btn danger" id="s-clearBtn" type="button">清空</button>
           <button class="btn primary" id="s-generateBtn" type="button">產生彙整報價單</button>
           <button class="btn good" id="s-wordBtn" type="button">匯出 Word</button>
+          <button class="btn good" id="s-saveFolderBtn" type="button">儲存彙整到資料夾</button>
           <button class="btn good" id="s-printBtn" type="button">列印 / 存成 PDF</button>
         </div>
         <div class="section-title">輸出主題色</div>
@@ -366,18 +381,15 @@
           <label class="field">案件類型
             <select id="s-caseType"><option value="new">新件</option><option value="renewal">續保件</option></select>
           </label>
-          <label class="field">搜尋案件
-            <input id="s-searchText" placeholder="公司、統編、案件編號">
-          </label>
-          <label class="field">險種
-            <select id="s-searchType"><option value="">全部</option><option value="商火">商火</option><option value="公共意外險">公共意外險</option></select>
+          <label class="field wide">案件 caseData 檔案
+            <input id="s-selectedCaseFile" readonly placeholder="尚未選擇；請選擇案件資料夾內的 _caseData JSON 檔">
           </label>
         </div>
         <div class="toolbar">
-          <button class="btn primary" id="s-searchBtn" type="button">搜尋 quote_drafts</button>
+          <button class="btn primary" id="s-loadCaseFileBtn" type="button">選擇 caseData JSON 檔案</button>
+          <input id="s-caseFileInput" type="file" accept=".json,application/json" style="display:none">
         </div>
-        <div class="status-box" id="s-caseDataStatus">請搜尋案件草稿並載入。本頁不讀 PDF，也不讓使用者上傳 JSON。</div>
-        <div class="status-box" id="s-searchResults" style="display:none;margin-top:8px"></div>
+        <div class="status-box" id="s-caseDataStatus">請直接選擇案件資料夾內的 _caseData JSON 檔。</div>
         <div id="s-renewalBlock" style="display:none">
           <div class="section-title">去年資料（續保件才需要）</div>
           <div class="grid">
@@ -387,6 +399,7 @@
           </div>
         </div>
         <div class="section-title">今年保險公司報價</div>
+        <label class="field wide">彙整存檔名稱<input id="s-summaryFileName" placeholder="例如：1150701範例汽車服務股份有限公司_火險(共2處)_彙整報價單"></label>
         <div class="col-count-row">
           <span>報價家數：</span>
           <select id="s-colCount">
@@ -399,7 +412,7 @@
     </section>
     <section class="preview-shell">
       <div class="panel-header print-hide"><span>OUTPUT：客戶版彙整報價單</span><span>不顯示佣金資料</span></div>
-      <div class="quote" id="s-preview"><div class="empty">搜尋並載入案件後，輸入報價再按「產生彙整報價單」。</div></div>
+      <div class="quote" id="s-preview"><div class="empty">選擇案件 caseData 後，輸入報價再按「產生彙整報價單」。</div></div>
     </section>
   </main>
 </div>
@@ -597,6 +610,7 @@ const F_PROP_MAP = [{key:"建築物",field:"building"},{key:"營業裝修",field
 const F_MONEY_FIELDS = ["building","decoration","machinery","equipment","goods"];
 const F_FIELD_LABELS = {building:"建築物",decoration:"營業裝修",machinery:"機器設備",equipment:"營業生財",goods:"貨物"};
 const F_DEFAULT_COVERS = ["地震險","颱風及洪水險","罷工、暴動、民眾騷擾、惡意破壞行為險","自動消防裝置滲漏險","竊盜險","第三人意外責任險","水漬險","爆炸險","航空器墜落、機動車輛碰撞險","營業中斷險(製造業適用)","營業中斷險(非製造業適用)","煙燻險","地層下陷、滑動或山崩險","租金損失險","恐怖主義險"];
+const F_NATURAL_COVER_NAMES = new Set(["地震險","颱風及洪水險"]);
 
 function f$(id){return document.getElementById(id)}
 function fMoney(v){const n=numVal(v);return n?n.toLocaleString("zh-TW"):""}
@@ -724,11 +738,37 @@ function fPercentOpts(val=""){
 }
 
 function fRenderCovers(){
-  f$("f-covers").innerHTML=F_DEFAULT_COVERS.map((n,i)=>`<tr><td style="text-align:center"><input type="checkbox" class="f-cover-on" ${i===0?"checked":""}></td><td><input class="f-cover-name" value="${escHtml(n)}"></td><td><select class="f-cover-amount">${fPercentOpts()}</select></td></tr>`).join("");
+  const rowHtml = (n,i) => `<tr class="f-cover-row"><td style="text-align:center"><input type="checkbox" class="f-cover-on" ${i===0?"checked":""}></td><td><input class="f-cover-name" value="${escHtml(n)}"></td><td><select class="f-cover-amount">${fPercentOpts()}</select></td></tr>`;
+  const natural = F_DEFAULT_COVERS.filter(n => fIsNaturalAddon(n));
+  const others = F_DEFAULT_COVERS.filter(n => !fIsNaturalAddon(n));
+  f$("f-natural-covers").innerHTML=natural.map(rowHtml).join("");
+  f$("f-covers").innerHTML=others.map(rowHtml).join("");
+  fSyncCoverRows();
 }
 
 function fAddCover(name="",amount=""){
-  f$("f-covers").insertAdjacentHTML("beforeend",`<tr><td style="text-align:center"><input type="checkbox" class="f-cover-on" checked></td><td><input class="f-cover-name" value="${escHtml(name)}" placeholder="自行輸入險種"></td><td><select class="f-cover-amount">${fPercentOpts(amount)}</select></td></tr>`);
+  f$("f-covers").insertAdjacentHTML("beforeend",`<tr class="f-cover-row"><td style="text-align:center"><input type="checkbox" class="f-cover-on" checked></td><td><input class="f-cover-name" value="${escHtml(name)}" placeholder="自行輸入險種"></td><td><select class="f-cover-amount">${fPercentOpts(amount)}</select></td></tr>`);
+  fSyncCoverRows();
+}
+
+function fSyncCoverRows(){
+  document.querySelectorAll(".f-cover-row").forEach(row => {
+    const nameInput = row.querySelector(".f-cover-name");
+    const amountSelect = row.querySelector(".f-cover-amount");
+    if (!nameInput || !amountSelect) return;
+    const natural = fIsNaturalAddon(nameInput.value);
+    const defaultOption = amountSelect.querySelector('option[value=""]');
+    if (defaultOption) defaultOption.textContent = natural ? "依天災設定" : "依上方設定";
+    amountSelect.disabled = false;
+    amountSelect.title = natural ? "留空時依天災設定；也可替地震險、颱風及洪水險個別指定比例。" : "";
+    row.classList.toggle("natural-addon-row", natural);
+  });
+}
+
+function fClearCovers(){
+  document.querySelectorAll(".f-cover-on").forEach(el => el.checked = false);
+  document.querySelectorAll(".f-cover-amount").forEach(el => el.value = "");
+  fSyncCoverRows();
 }
 
 function fLocationTpl(idx,d={}){
@@ -766,7 +806,20 @@ function fireAmountNumber(location, field){
 }
 function fLocSubtotal(loc){return F_MONEY_FIELDS.reduce((s,f)=>s+fireAmountNumber(loc,f),0);}
 function fTotalFire(locs){return locs.reduce((s,l)=>s+fLocSubtotal(l),0);}
-function fReadCovers(){return[...document.querySelectorAll("#f-covers tr")].map(r=>({on:r.querySelector(".f-cover-on").checked,name:plainStr(r.querySelector(".f-cover-name").value),amount:plainStr(r.querySelector(".f-cover-amount").value)})).filter(c=>c.on&&c.name);}
+function fReadPerils(){
+  return [...document.querySelectorAll(".f-peril-check:checked")].map(e=>plainStr(e.value)).filter(Boolean);
+}
+function fReadCovers(){
+  fSyncCoverRows();
+  return[...document.querySelectorAll(".f-cover-row")].map(r=>{
+    const name=plainStr(r.querySelector(".f-cover-name").value);
+    return {
+      on:r.querySelector(".f-cover-on").checked,
+      name,
+      amount:plainStr(r.querySelector(".f-cover-amount").value)
+    };
+  }).filter(c=>c.on&&c.name);
+}
 function fSelClauses(){
   const sel=new Set([...document.querySelectorAll(".f-clause-check:checked")].map(e=>e.value));
   const std=SB_CLAUSES.filter(c=>sel.has(c.code));
@@ -810,6 +863,14 @@ function parseAddonPercent(value){
   return m ? Number(m[0]) : 0;
 }
 
+function fAddonKey(name){
+  return plainStr(name).replace(/\s+/g,"");
+}
+
+function fIsNaturalAddon(name){
+  return F_NATURAL_COVER_NAMES.has(fAddonKey(name));
+}
+
 // 將 covers 分類成三組：
 // enabledAddons：全部有勾選的附加險
 // defaultPercentAddons：勾選且使用「依上方設定」比例 → 套用上方「其他附加險比例」，不可列入排除清單
@@ -823,7 +884,7 @@ function classifyAddons(covers){
 
 function buildFireAdditionalCoverages(covers,total,addonPct){
   const defaultPct = Number(addonPct || 0);
-  return (covers || []).filter(c => c && c.on !== false && c.name).map(c => {
+  return (covers || []).filter(c => c && c.on !== false && c.name && !fIsNaturalAddon(c.name)).map(c => {
     const ratio = isDefaultAddonPercent(c.amount) ? defaultPct : parseAddonPercent(c.amount);
     return {
       name: c.name,
@@ -834,6 +895,34 @@ function buildFireAdditionalCoverages(covers,total,addonPct){
       usesDefaultRatio: isDefaultAddonPercent(c.amount)
     };
   });
+}
+
+function buildFireNaturalRows(naturalNames,total,percent){
+  return buildRatioGroupedRows((naturalNames || []).map((name, index) => ({
+    name,
+    ratio: Number(percent || 0),
+    _order: index
+  })), total);
+}
+
+function buildRatioGroupedRows(rows,total){
+  const enabled = (rows || []).filter(c => c && c.name && Number(c.ratio || 0)).map((c,index)=>({...c,_order:c._order ?? index}));
+  if (!enabled.length) return [];
+  const groups = new Map();
+  enabled.forEach(c => {
+    const ratio = Number(c.ratio || 0);
+    const key = String(ratio);
+    if (!groups.has(key)) groups.set(key,{ratio,coverages:[],firstOrder:c._order});
+    groups.get(key).coverages.push(c);
+  });
+  return [...groups.values()].sort((a,b)=>a.firstOrder-b.firstOrder).map(g=>({
+    label:g.coverages.map(c=>c.name).join("、"),
+    percent:g.ratio,
+    ratio:g.ratio,
+    amount:total*g.ratio/100,
+    coverages:g.coverages.map(c=>c.name),
+    isBaseGroup:g.coverages.length > 1
+  }));
 }
 
 function buildAdditionalCoverageSummary(caseData){
@@ -847,9 +936,7 @@ function buildAdditionalCoverageSummary(caseData){
     });
 
   if (!enabledCoverages.length) {
-    return defaultPct
-      ? [{ label: "附加險比例", percent: defaultPct, ratio: defaultPct, amount: total*defaultPct/100, coverages: [], isBaseGroup: true }]
-      : [];
+    return [];
   }
 
   const groups = new Map();
@@ -864,7 +951,7 @@ function buildAdditionalCoverageSummary(caseData){
   if (grouped.length === 1) {
     const g = grouped[0];
     return [{
-      label: "附加險比例",
+      label: "其餘附加險比例",
       percent: g.ratio,
       ratio: g.ratio,
       amount: total * g.ratio / 100,
@@ -880,7 +967,7 @@ function buildAdditionalCoverageSummary(caseData){
     const exceptions = grouped.filter(g => g !== base);
     const exceptionNames = exceptions.flatMap(g => g.coverages.map(c => c.name));
     return [{
-      label: `除${exceptionNames.join("、")}以外之附加險比例`,
+      label: `除${exceptionNames.join("、")}以外之其餘附加險比例`,
       percent: base.ratio,
       ratio: base.ratio,
       amount: total * base.ratio / 100,
@@ -908,20 +995,78 @@ function buildAdditionalCoverageSummary(caseData){
 }
 
 function buildFireAdditionalCoverageSummary(covers,total,addonPct){
+  const nonNaturalCovers = (covers || []).filter(c => !fIsNaturalAddon(c.name));
   return buildAdditionalCoverageSummary({
     addonPercent: addonPct,
     totalFireAmount: total,
-    additionalCoverages: buildFireAdditionalCoverages(covers,total,addonPct)
+    additionalCoverages: buildFireAdditionalCoverages(nonNaturalCovers,total,addonPct)
   });
 }
 
-// 附加險輸出：先建立資料陣列，再逐列 render 成獨立 <tr>，不用字串拼接接成一整列
-function fAddonRows(covers,total,addonPct){
-  const rowsData = buildFireAdditionalCoverageSummary(covers,total,addonPct);
+function buildFireAddons(covers,total,natPct,natLimit,addonPct){
+  const selectedCovers = (covers || []).filter(c => c && c.on !== false && c.name);
+  const naturalCovers = selectedCovers.filter(c => fIsNaturalAddon(c.name));
+  const nonNaturalCovers = selectedCovers.filter(c => !fIsNaturalAddon(c.name));
+  const nonNaturalRows = buildFireAdditionalCoverageSummary(nonNaturalCovers,total,addonPct);
+  const naturalItems = naturalCovers.map((c,index) => {
+    const ratio = isDefaultAddonPercent(c.amount) ? Number(natPct || 0) : parseAddonPercent(c.amount);
+    return {name:c.name, percentMode:isDefaultAddonPercent(c.amount) ? "shared" : "individual", percent:ratio, effectiveRatio:ratio, _order:index};
+  });
+  const naturalLimitItems = naturalItems.map(item => ({...item, ratio:Number(natLimit || 0), percent:Number(natLimit || 0), effectiveRatio:Number(natLimit || 0)}));
+  const naturalNames = naturalItems.map(c => c.name);
+  const selectedAddons = selectedCovers.map((c,index) => ({
+    id: `${fIsNaturalAddon(c.name) ? "natural" : "nonNatural"}-${index}-${fAddonKey(c.name)}`,
+    name: c.name,
+    category: fIsNaturalAddon(c.name) ? "natural" : "nonNatural",
+    enabled: true
+  }));
+  return {
+    selectedAddons,
+    natural: {
+      mode: naturalItems.some(item => item.percentMode === "individual") ? "mixed" : "shared",
+      selected: naturalNames,
+      shared: {
+        coveragePercent: Number(natPct || 0),
+        limitPercent: Number(natLimit || 0)
+      },
+      items: naturalItems,
+      individual: Object.fromEntries(naturalItems.filter(item => item.percentMode === "individual").map(item => [fAddonKey(item.name), item.effectiveRatio]))
+    },
+    nonNatural: {
+      defaultPercent: Number(addonPct || 0),
+      items: buildFireAdditionalCoverages(nonNaturalCovers,total,addonPct).map(item => ({
+        name: item.name,
+        percentMode: item.usesDefaultRatio ? "default" : "individual",
+        percent: item.effectiveRatio,
+        effectiveRatio: item.effectiveRatio,
+        limitPercent: null,
+        deductible: "",
+        remarks: ""
+      }))
+    },
+    summary: {
+      naturalRows: buildRatioGroupedRows(naturalItems.map((item,index)=>({name:item.name,ratio:item.effectiveRatio,_order:index})),total),
+      naturalLimitRows: buildRatioGroupedRows(naturalLimitItems.map((item,index)=>({name:item.name,ratio:item.effectiveRatio,_order:index})),total),
+      nonNaturalRows,
+      selectedNames: selectedCovers.map(c => c.name)
+    }
+  };
+}
 
-  return rowsData.map(r =>
+// 附加險輸出：先建立資料陣列，再逐列 render 成獨立 <tr>，不用字串拼接接成一整列
+function fSummaryRowsHtml(rowsData){
+  return (rowsData || []).map(r =>
     `<tr><td style="font-weight:700">${escHtml(r.label)}</td><td>火險保額 ${escHtml(r.percent)}%：${fMoney(r.amount)}</td></tr>`
   ).join("");
+}
+
+function fAddonRows(covers,total,addonPct){
+  return fSummaryRowsHtml(buildFireAdditionalCoverageSummary(covers,total,addonPct));
+}
+
+function fSelectedAddonRows(fireAddons){
+  const names = fireAddons?.summary?.selectedNames || [];
+  return names.length ? `<tr><td>${escHtml(names.join("、"))}</td></tr>` : "";
 }
 
 function fRenderQuote(){
@@ -934,9 +1079,11 @@ function fRenderQuote(){
   const natPct=caseData.naturalDisaster?.percent || 0;
   const natLim=caseData.naturalDisaster?.limitPercent || 0;
   const addonPct=caseData.addonPercent || 0;
+  const fireAddons=caseData.fireAddons || buildFireAddons(covers,total,natPct,natLim,addonPct);
   const applicant=caseData.applicant || {};
   const insurerQuote=caseData.insurerQuote || {};
   const repairCol=industry==="汽車業"?`<th>是否有修理廠</th>`:"";
+  const perils=(caseData.perils && caseData.perils.length ? caseData.perils : ["火災","爆炸引起之火災","閃電雷擊"]);
   const rows=locs.map((loc,i)=>{
     return `<tr><td>${i+1}</td><td>${escHtml(loc.siteName)}</td><td>${escHtml(loc.address)}</td><td>${escHtml(loc.usageNature)}</td><td style="text-align:right">${escHtml(formatFireAmountCell(loc,"building"))}</td><td style="text-align:right">${escHtml(formatFireAmountCell(loc,"decoration"))}</td><td style="text-align:right">${escHtml(formatFireAmountCell(loc,"machinery"))}</td><td style="text-align:right">${escHtml(formatFireAmountCell(loc,"equipment"))}</td><td style="text-align:right">${escHtml(formatFireAmountCell(loc,"goods"))}</td>${industry==="汽車業"?`<td>${escHtml(loc.repairShop||"否")}</td>`:""}<td style="text-align:right;font-weight:700">${fMoney(fLocSubtotal(loc))||"-"}</td><td>${escHtml(loc.structure)}</td></tr>`;
   }).join("");
@@ -958,15 +1105,16 @@ function fRenderQuote(){
       <div class="info-label">抵押銀行</div><div style="grid-column:span 3">${escHtml(caseData.mortgageBank)}</div>
     </div>
     <h3>被保險人資訊</h3>${fInsuredHtml()}
-    <h3>本保險契約所承保之危險事故</h3><table><tbody><tr><td>火災</td></tr><tr><td>爆炸引起之火災</td></tr><tr><td>閃電雷擊</td></tr></tbody></table>
+    <h3>承保內容</h3><table><tbody>${perils.map(p=>`<tr><td>${escHtml(p)}</td></tr>`).join("")||`<tr><td>無</td></tr>`}</tbody></table>
     <h3>標的物與保額</h3>
     <table><thead><tr><th>#</th><th>名稱</th><th>標的物地址</th><th>使用性質</th><th>建築物</th><th>營業裝修</th><th>機器設備</th><th>營業生財</th><th>貨物</th>${repairCol}<th>小計</th><th>建築結構</th></tr></thead>
     <tbody>${rows||`<tr><td colspan="11">尚未輸入標的物</td></tr>`}</tbody>
     <tfoot><tr><td colspan="${industry==="汽車業"?11:10}" style="text-align:right;font-weight:700">火險總保額</td><td style="font-weight:700;text-align:right">${fMoney(total)}</td></tr></tfoot></table>
+    <h3>附加險種</h3><table><tbody>${fSelectedAddonRows(fireAddons)||`<tr><td>無</td></tr>`}</tbody></table>
     <h3>自負額</h3><table><tbody><tr><td>${escHtml(caseData.deductible).replace(/\n/g,"<br>")}</td></tr></tbody></table>
-    <h3>天災保額</h3><table><tbody><tr><td>火險保額 ${natPct}%：${fMoney(total*Number(natPct)/100)}</td></tr></tbody></table>
-    <h3>天災限額</h3><table><tbody><tr><td>火險保額 ${natLim}%：${fMoney(total*Number(natLim)/100)}</td></tr></tbody></table>
-    <h3>附加險</h3><table><tbody>${fAddonRows(covers,total,addonPct)}</tbody></table>
+    <h3>天災保額</h3><table><tbody>${fSummaryRowsHtml(fireAddons.summary?.naturalRows)||`<tr><td>無</td></tr>`}</tbody></table>
+    <h3>天災限額</h3><table><tbody>${fSummaryRowsHtml(fireAddons.summary?.naturalLimitRows)||`<tr><td>無</td></tr>`}</tbody></table>
+    <h3>其餘附加險</h3><table><tbody>${fSummaryRowsHtml(fireAddons.summary?.nonNaturalRows)||`<tr><td>-</td></tr>`}</tbody></table>
     <h3>備註</h3><table><tbody><tr><td>${escHtml(caseData.remarks).replace(/\n/g,"<br>")}</td></tr></tbody></table>
     <h3>SB 附加條款</h3><ol class="terms-list">${clauses.map(c=>`<li>${escHtml(fClauseDisplay(c))}</li>`).join("")||"<li>無</li>"}</ol>
     <h3>保險公司報價</h3>
@@ -987,6 +1135,7 @@ function fBuildCaseData(context="save"){
   const addonPct = f$("f-addonPercent").value;
   const additionalCoverages = buildFireAdditionalCoverages(covers,total,addonPct);
   const additionalCoverageSummary = buildFireAdditionalCoverageSummary(covers,total,addonPct);
+  const fireAddons = buildFireAddons(covers,total,f$("f-natPercent").value,f$("f-natLimit").value,addonPct);
   console.log(context === "render" ? "[FIRE COLLECT latest additionalCoverages]" : "[FIRE SAVE latest additionalCoverages]", additionalCoverages);
   console.log(context === "render" ? "[FIRE COLLECT latest summary]" : "[FIRE SAVE latest summary]", additionalCoverageSummary);
   return {
@@ -997,13 +1146,15 @@ function fBuildCaseData(context="save"){
     insured:f$("f-sameInsured").checked?{sameAsApplicant:true}:{sameAsApplicant:false,companyName:f$("f-insuredCompanyName").value,taxId:f$("f-insuredTaxId").value,representative:f$("f-insuredRepresentative").value,phone:f$("f-insuredPhone").value,mailingAddress:f$("f-insuredMailingAddress").value},
     industry:f$("f-industry").value, insurancePeriod:f$("f-insurancePeriod").value, mortgageBank:f$("f-mortgageBank").value,
     policyPeriod:f$("f-insurancePeriod").value,
+    perils:fReadPerils(),
     locations:locs, totalFireAmount:total,
     deductible:f$("f-deductible").value,
     naturalDisaster:{percent:f$("f-natPercent").value,limitPercent:f$("f-natLimit").value},
     addonPercent:addonPct,
     addonCovers:covers,
-    additionalCoverages,
+    additionalCoverages:buildFireAdditionalCoverages(covers.filter(c=>!fIsNaturalAddon(c.name)),total,addonPct),
     additionalCoverageSummary,
+    fireAddons,
     clauses,
     remarks:f$("f-remarks").value,
     insurerQuote:{
@@ -1064,6 +1215,8 @@ function fFillSample(){
   fAddLocation({siteName:"範例-服務廠B",address:"臺北市範例區示範街200號(全棟)",usageNature:"倉庫",decoration:"38000000",machinery:"1100000",goods:"17500000",repairShop:"是",structure:"鋼骨造鐵皮屋頂地上3層樓地下1層樓 頭等建築"});
   f$("f-remarks").value="本保單颱風及洪水險對於室外廣告設備及招牌所遭受之損失及滅失，亦負賠償責任。";
   document.querySelectorAll(".f-cover-on").forEach(el=>el.checked=true);
+  document.querySelectorAll(".f-peril-check").forEach(el=>el.checked=true);
+  fSyncCoverRows();
   fRenderClauses("recommend"); fRenderQuote();
 }
 
@@ -1072,6 +1225,8 @@ function fClearAll(){
   f$("f-sameInsured").checked=false; fSyncInsured();
   f$("f-locations").innerHTML=""; fAddLocation();
   document.querySelectorAll(".f-cover-on").forEach((el,i)=>el.checked=i===0);
+  document.querySelectorAll(".f-peril-check").forEach(el=>el.checked=true);
+  fSyncCoverRows();
   fRenderClauses("none"); f$("f-customClauseBox").innerHTML="";
   f$("f-quotePreview").innerHTML=`<div class="empty">填完左側資料後，按「產生報價單」。</div>`;
   f$("f-saveStatus").textContent="已清空";
@@ -1087,6 +1242,7 @@ f$("f-industry").addEventListener("change",()=>{fSyncIndustry();fHandleInputChan
 f$("f-sameInsured").addEventListener("change",()=>{fSyncInsured();fHandleInputChanged();});
 f$("f-addLocationBtn").addEventListener("click",()=>{fAddLocation();fHandleInputChanged();});
 f$("f-addCoverBtn").addEventListener("click",()=>{fAddCover();fHandleInputChanged();});
+f$("f-clearCoversBtn").addEventListener("click",()=>{fClearCovers();fHandleInputChanged();});
 f$("f-recommendBtn").addEventListener("click",()=>{fRenderClauses("recommend");fHandleInputChanged();});
 f$("f-selectAllClausesBtn").addEventListener("click",()=>{fRenderClauses("all");fHandleInputChanged();});
 f$("f-clearClausesBtn").addEventListener("click",()=>{fRenderClauses("none");f$("f-customClauseBox").innerHTML="";fHandleInputChanged();});
@@ -1117,6 +1273,7 @@ function fHasRenderedPreview(){
   return !f$("f-quotePreview")?.querySelector(".empty");
 }
 function fHandleInputChanged(){
+  fSyncCoverRows();
   fMarkDirty();
   if (fHasRenderedPreview()) fRenderQuote();
 }
@@ -1337,6 +1494,7 @@ lRenderClauses(true); lAddLocation(); lSyncInsured();
 // 報價彙整模組
 // ══════════════════════════════════════════════════════════
 let sCaseData=null;
+let sCaseDataFileLabel="";
 function s$(id){return document.getElementById(id);}
 function sEsc(v){return escHtml(v);}
 function sFmt(v){const n=numVal(v);return n?n.toLocaleString("zh-TW"):plainStr(v);}
@@ -1351,15 +1509,17 @@ function sReadQuotes(){
 function sRenderInputs(){
   const n=sGetN(), old=sReadQuotes();
   const oldExp=s$("s-sharedExp")?s$("s-sharedExp").value:"";
+  const oldSharedRemarks=s$("s-sharedRemarks")?s$("s-sharedRemarks").value:"";
   const headers=Array.from({length:n},(_,i)=>`<th>保險公司${i+1}</th>`).join("");
   const compRow=Array.from({length:n},(_,i)=>`<td><input data-scol="${i}" data-sfield="company" value="${sEsc(old[i]?.company||"")}"></td>`).join("");
   const premRow=Array.from({length:n},(_,i)=>`<td><input data-scol="${i}" data-sfield="premium" value="${sEsc(old[i]?.premium||"")}"></td>`).join("");
-  const remRow=Array.from({length:n},(_,i)=>`<td><textarea data-scol="${i}" data-sfield="remarks">${sEsc(old[i]?.remarks||"")}</textarea></td>`).join("");
+  const diffRow=Array.from({length:n},(_,i)=>`<td><textarea data-scol="${i}" data-sfield="difference" placeholder="例：保費較低、保障較完整、條件較佳">${sEsc(old[i]?.difference||"")}</textarea></td>`).join("");
   s$("s-quoteInputWrap").innerHTML=`<table class="input-table"><thead><tr><th></th>${headers}</tr></thead><tbody>
     <tr><td>保險公司名稱</td>${compRow}</tr>
     <tr><td>保險費</td>${premRow}</tr>
+    <tr><td>報價差異</td>${diffRow}</tr>
     <tr><td>報價說明</td><td colspan="${n}"><textarea id="s-sharedExp" placeholder="請輸入給客戶看的共同報價說明">${sEsc(oldExp)}</textarea></td></tr>
-    <tr><td>備註</td>${remRow}</tr>
+    <tr><td>備註</td><td colspan="${n}"><textarea id="s-sharedRemarks" placeholder="請輸入共同備註">${sEsc(oldSharedRemarks)}</textarea></td></tr>
   </tbody></table>`;
   s$("s-quoteInputWrap").querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input",sGenerate));
 }
@@ -1392,7 +1552,12 @@ function sOriginalFire(data){
   const total=data.totalFireAmount||(data.locations||[]).reduce((s,l)=>s+["building","decoration","machinery","equipment","goods"].reduce((a,k)=>a+numVal(l[k]),0),0);
   const np=Number(data.naturalDisaster?.percent||data.naturalDisasterPercent||0), nl=Number(data.naturalDisaster?.limitPercent||data.naturalDisasterLimit||0), ap=Number(data.addonPercent||0);
   const rows=(data.locations||[]).map((loc,i)=>`<tr><td>${i+1}</td><td>${sEsc(loc.siteName)}</td><td>${sEsc(loc.address)}</td><td>${sEsc(loc.usageNature)}</td><td style="text-align:right">${sFmt(loc.building)}</td><td style="text-align:right">${sFmt(loc.decoration)}</td><td style="text-align:right">${sFmt(loc.machinery)}</td><td style="text-align:right">${sFmt(loc.equipment)}</td><td style="text-align:right">${sFmt(loc.goods)}</td><td>${sEsc(loc.repairShop)}</td><td style="text-align:right;font-weight:700">${sFmt(["building","decoration","machinery","equipment","goods"].reduce((s,k)=>s+numVal(loc[k]),0))}</td><td>${sEsc(loc.structure)}</td></tr>`).join("");
-  return `${sPartyHtml(data)}<h3>本保險契約所承保之危險事故</h3><table><tbody><tr><td>火災</td></tr><tr><td>爆炸引起之火災</td></tr><tr><td>閃電雷擊</td></tr></tbody></table><h3>標的物與保額</h3><table><thead><tr><th>#</th><th>名稱</th><th>標的物地址</th><th>使用性質</th><th>建築物</th><th>營業裝修</th><th>機器設備</th><th>營業生財</th><th>貨物</th><th>是否有修理廠</th><th>小計</th><th>建築結構</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="10" style="text-align:right;font-weight:700">火險總保額</td><td colspan="2" style="text-align:right;font-weight:700">${sFmt(total)}</td></tr></tfoot></table><h3>自負額</h3><table><tbody><tr><td>${sEsc(data.deductible||"").replace(/\n/g,"<br>")}</td></tr></tbody></table><h3>天災保額</h3><table><tbody><tr><td>火險保額 ${np}%：${sFmt(total*np/100)}</td></tr></tbody></table><h3>天災限額</h3><table><tbody><tr><td>火險保額 ${nl}%：${sFmt(total*nl/100)}</td></tr></tbody></table><h3>附加險</h3><table><tbody><tr><td>其他附加險比例：火險保額 ${ap}%：${sFmt(total*ap/100)}</td></tr></tbody></table><h3>備註</h3><table><tbody><tr><td>${sEsc(data.remarks||"").replace(/\n/g,"<br>")}</td></tr></tbody></table><h3>SB 附加條款</h3><ol class="terms-list">${(data.clauses||[]).map(c=>`<li>${sEsc(stripEnglish(sClauseText(c)))}</li>`).join("")}</ol>`;
+  const perils=(data.perils&&data.perils.length?data.perils:["火災","爆炸引起之火災","閃電雷擊"]);
+  const selectedAddons = (data.fireAddons?.selectedAddons || (data.addonCovers || []).filter(c => c && c.on !== false && c.name).map(c => c.name)).filter(Boolean);
+  const hasNonNaturalAddons = Boolean((data.fireAddons?.summary?.nonNaturalRows || []).length || (data.addonCovers || []).some(c => c && c.on !== false && c.name && !fIsNaturalAddon(c.name)));
+  const nonNaturalCell = hasNonNaturalAddons ? `其餘附加險比例：火險保額 ${ap}%：${sFmt(total*ap/100)}` : "-";
+  const selectedAddonRows = selectedAddons.length ? `<tr><td>${sEsc(selectedAddons.map(addon => typeof addon === "string" ? addon : addon.name || "").filter(Boolean).join("、"))}</td></tr>` : `<tr><td>無</td></tr>`;
+  return `${sPartyHtml(data)}<h3>承保內容</h3><table><tbody>${perils.map(p=>`<tr><td>${sEsc(p)}</td></tr>`).join("")}</tbody></table><h3>標的物與保額</h3><table><thead><tr><th>#</th><th>名稱</th><th>標的物地址</th><th>使用性質</th><th>建築物</th><th>營業裝修</th><th>機器設備</th><th>營業生財</th><th>貨物</th><th>是否有修理廠</th><th>小計</th><th>建築結構</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="10" style="text-align:right;font-weight:700">火險總保額</td><td colspan="2" style="text-align:right;font-weight:700">${sFmt(total)}</td></tr></tfoot></table><h3>附加險種</h3><table><tbody>${selectedAddonRows}</tbody></table><h3>自負額</h3><table><tbody><tr><td>${sEsc(data.deductible||"").replace(/\n/g,"<br>")}</td></tr></tbody></table><h3>天災保額</h3><table><tbody><tr><td>火險保額 ${np}%：${sFmt(total*np/100)}</td></tr></tbody></table><h3>天災限額</h3><table><tbody><tr><td>火險保額 ${nl}%：${sFmt(total*nl/100)}</td></tr></tbody></table><h3>其餘附加險</h3><table><tbody><tr><td>${nonNaturalCell}</td></tr></tbody></table><h3>備註</h3><table><tbody><tr><td>${sEsc(data.remarks||"").replace(/\n/g,"<br>")}</td></tr></tbody></table><h3>SB 附加條款</h3><ol class="terms-list">${(data.clauses||[]).map(c=>`<li>${sEsc(stripEnglish(sClauseText(c)))}</li>`).join("")}</ol>`;
 }
 
 function sOriginalLiability(data){
@@ -1407,11 +1572,12 @@ function sSummaryTable(){
     :quotes.map((q,i)=>({...q,label:`保險公司${i+1}`}));
   const total=cols.length, cell=v=>`<td>${sEsc(v||"").replace(/\n/g,"<br>")}</td>`;
   const exp=s$("s-sharedExp")?s$("s-sharedExp").value:"";
-  return `<h3>保險公司報價比較</h3><table><thead><tr><th style="width:100px">項目</th>${cols.map(c=>`<th>${sEsc(c.label)}</th>`).join("")}</tr></thead><tbody><tr><td style="font-weight:700">保險公司</td>${cols.map(c=>cell(c.company)).join("")}</tr><tr><td style="font-weight:700">保險費</td>${cols.map(c=>cell(sFmt(c.premium))).join("")}</tr><tr><td style="font-weight:700">報價說明</td><td colspan="${total}" style="white-space:pre-wrap">${sEsc(exp)}</td></tr><tr><td style="font-weight:700">備註</td>${cols.map(c=>cell(c.remarks)).join("")}</tr></tbody></table>`;
+  const sharedRemarks=s$("s-sharedRemarks")?s$("s-sharedRemarks").value:"";
+  return `<h3>保險公司報價比較</h3><table><thead><tr><th style="width:100px">項目</th>${cols.map(c=>`<th>${sEsc(c.label)}</th>`).join("")}</tr></thead><tbody><tr><td style="font-weight:700">保險公司</td>${cols.map(c=>cell(c.company)).join("")}</tr><tr><td style="font-weight:700">保險費</td>${cols.map(c=>cell(sFmt(c.premium))).join("")}</tr><tr><td style="font-weight:700">報價差異</td>${cols.map(c=>cell(c.difference)).join("")}</tr><tr><td style="font-weight:700">報價說明</td><td colspan="${total}" style="white-space:pre-wrap">${sEsc(exp)}</td></tr><tr><td style="font-weight:700">備註</td><td colspan="${total}" style="white-space:pre-wrap">${sEsc(sharedRemarks)}</td></tr></tbody></table>`;
 }
 
 function sGenerate(){
-  if(!sCaseData){s$("s-preview").innerHTML='<div class="empty">請先搜尋並載入案件。</div>';return;}
+  if(!sCaseData){s$("s-preview").innerHTML='<div class="empty">請先選擇案件資料夾或 caseData JSON。</div>';return;}
   // 套用主題色到預覽區
   const preview=s$("s-preview");
   const {color:tc,text:tt}=getTheme('s');
@@ -1422,10 +1588,41 @@ function sGenerate(){
   s$("s-status").textContent="已產生";
 }
 
+function sPolicyStartParts(data){
+  const text = String(data?.policyPeriod || data?.insurancePeriod || "");
+  const m = text.match(/(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})/);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date();
+  const rocYear = d.getFullYear() - 1911;
+  return `${rocYear}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function sInsuranceShortName(data){
+  const t = String(data?.insuranceType || "");
+  if (t.includes("公共")) return "公共意外險";
+  return "火險";
+}
+
+function sDefaultSummaryBaseName(data=sCaseData){
+  const fromFile = String(sCaseDataFileLabel || "").replace(/\.[^.]+$/,"");
+  if (fromFile.includes("原始報價單")) {
+    return fromFile.replace(/_?原始報價單(?:_caseData)?$/,"_彙整報價單");
+  }
+  const company = data?.applicant?.companyName || data?.companyName || "未命名公司";
+  const count = Array.isArray(data?.locations) ? data.locations.length : 0;
+  return `${sPolicyStartParts(data)}${company}_${sInsuranceShortName(data)}(共${count}處)_彙整報價單`;
+}
+
+function sSetDefaultSummaryFileName(){
+  const el = s$("s-summaryFileName");
+  if (el && sCaseData) el.value = sDefaultSummaryBaseName(sCaseData);
+}
 
 function sLoadCaseData(data, label="") {
   sCaseData = data;
+  sCaseDataFileLabel = label || "";
   s$("s-caseDataStatus").textContent = `已載入案件：${label || data.applicant?.companyName || ""}；${data.insuranceType || ""}`;
+  if(s$("s-selectedCaseFile")) s$("s-selectedCaseFile").value = label || data.archive?.caseDataPath || "";
+  sSetDefaultSummaryFileName();
   if(sCaseData.theme?.color){
     const tc=sCaseData.theme.color, tt=sCaseData.theme.text||'#111';
     moduleTheme['s']={color:tc,text:tt};
@@ -1435,6 +1632,28 @@ function sLoadCaseData(data, label="") {
     });
   }
   sGenerate();
+}
+
+function sIsCaseDataFileName(name){
+  const n = String(name || "").toLowerCase();
+  return n.endsWith(".json") && (n.includes("casedata") || n.includes("case_data") || n.includes("_case"));
+}
+
+async function sFindCaseDataFiles(dirHandle, prefix=""){
+  const found = [];
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind === "file" && sIsCaseDataFileName(name)) {
+      found.push({name, path: prefix ? `${prefix}/${name}` : name, handle});
+    } else if (handle.kind === "directory") {
+      const child = await sFindCaseDataFiles(handle, prefix ? `${prefix}/${name}` : name);
+      found.push(...child);
+    }
+  }
+  return found;
+}
+
+async function sPickCaseData(){
+  s$("s-caseFileInput").click();
 }
 
 async function sSearchDrafts(){
@@ -1465,9 +1684,13 @@ async function sSearchDrafts(){
   });
 }
 
-async function sLoadCase(file){
+async function sLoadCase(file,label=""){
   sCaseData=JSON.parse(await file.text());
-  s$("s-caseDataStatus").textContent=`已讀取：${file.name}；${sCaseData.applicant?.companyName||""}；${sCaseData.insuranceType||""}`;
+  const fileLabel = label || file.name;
+  sCaseDataFileLabel = fileLabel;
+  if(s$("s-selectedCaseFile")) s$("s-selectedCaseFile").value = fileLabel;
+  s$("s-caseDataStatus").textContent=`已讀取：${fileLabel}；${sCaseData.applicant?.companyName||""}；${sCaseData.insuranceType||""}`;
+  sSetDefaultSummaryFileName();
   // 若 caseData 有主題色，套用到報價彙整
   if(sCaseData.theme?.color){
     const tc=sCaseData.theme.color, tt=sCaseData.theme.text||'#111';
@@ -1481,9 +1704,9 @@ async function sLoadCase(file){
   sGenerate();
 }
 
-function sExportWord(){
+function sExportWord(download=true){
   sGenerate();
-  if(!sCaseData) return;
+  if(!sCaseData) return null;
 
   // ── 主題色（Word 用 inline style）─────────────────────
   const {color:tc,text:tt}=getTheme('s');
@@ -1505,11 +1728,12 @@ function sExportWord(){
   const quotes = sReadQuotes();
   const isRenewal = s$("s-caseType").value === "renewal";
   const cols = isRenewal
-    ? [{company:s$("s-lastCompany").value, premium:s$("s-lastPremium").value, remarks:s$("s-lastRemarks").value, label:"去年"},
+    ? [{company:s$("s-lastCompany").value, premium:s$("s-lastPremium").value, difference:"", remarks:s$("s-lastRemarks").value, label:"去年"},
        ...quotes.map((q,i)=>({...q, label:`今年保險公司${i+1}`}))]
     : quotes.map((q,i)=>({...q, label:`保險公司${i+1}`}));
   const totalCols = cols.length;
   const exp = s$("s-sharedExp") ? s$("s-sharedExp").value : "";
+  const sharedRemarks = s$("s-sharedRemarks") ? s$("s-sharedRemarks").value : "";
 
   // ── 輔助函式 ──────────────────────────────────────────
   // 主題色滿版區塊標題
@@ -1577,8 +1801,8 @@ function sExportWord(){
     const nl = Number(sCaseData.naturalDisaster?.limitPercent||sCaseData.naturalDisasterLimit||0);
     const ap = Number(sCaseData.addonPercent||0);
 
-    body += wH("本保險契約所承保之危險事故");
-    body += wSimple("火災　　爆炸引起之火災　　閃電雷擊");
+    body += wH("承保內容");
+    body += wSimple((sCaseData.perils&&sCaseData.perils.length?sCaseData.perils:["火災","爆炸引起之火災","閃電雷擊"]).join("　　"));
 
     // 標的物表格 — A4 直向 12 欄，字縮小
     const fCols = ["4%","10%","18%","10%","7%","7%","7%","7%","7%","5%","8%","10%"];
@@ -1604,10 +1828,14 @@ function sExportWord(){
       <td colspan="2" style="${BP};text-align:right;font-weight:700;background:#eef5f9">${sFmt(total)}</td></tr></tfoot>
     </table>`;
 
+    const selectedAddons = (sCaseData.fireAddons?.selectedAddons || (sCaseData.addonCovers || []).filter(c => c && c.on !== false && c.name).map(c => c.name)).filter(Boolean);
+    const selectedAddonLines = selectedAddons.map(addon => sEsc(typeof addon === "string" ? addon : addon.name || "")).filter(Boolean).join("、");
+    const hasNonNaturalAddons = Boolean((sCaseData.fireAddons?.summary?.nonNaturalRows || []).length || (sCaseData.addonCovers || []).some(c => c && c.on !== false && c.name && !fIsNaturalAddon(c.name)));
+    body += wH("附加險種") + wSimple(selectedAddonLines || "無");
     body += wH("自負額") + wSimple(sEsc(sCaseData.deductible||"").replace(/\n/g,"<br>"));
     body += wH("天災保額") + wSimple(`火險保額 ${np}%：${sFmt(total*np/100)}`);
     body += wH("天災限額") + wSimple(`火險保額 ${nl}%：${sFmt(total*nl/100)}`);
-    body += wH("附加險")   + wSimple(`其他附加險比例：火險保額 ${ap}%：${sFmt(total*ap/100)}`);
+    body += wH("其餘附加險")   + wSimple(hasNonNaturalAddons ? `其餘附加險比例：火險保額 ${ap}%：${sFmt(total*ap/100)}` : "-");
     body += wH("備註")     + wSimple(sEsc(sCaseData.remarks||"").replace(/\n/g,"<br>") || "—");
 
     // SB 附加條款（兩欄清單）
@@ -1689,8 +1917,9 @@ function sExportWord(){
     <tbody>
       <tr>${qTd("保險公司",true)}${cols.map(c=>qTd(c.company)).join("")}</tr>
       <tr>${qTd("保險費",true)}${cols.map(c=>qTd(sFmt(c.premium))).join("")}</tr>
+      <tr>${qTd("報價差異",true)}${cols.map(c=>qTd(c.difference)).join("")}</tr>
       <tr>${qTd("報價說明",true)}<td colspan="${totalCols}" style="${BP}">${sEsc(exp).replace(/\n/g,"<br>")}</td></tr>
-      <tr>${qTd("備註",true)}${cols.map(c=>qTd(c.remarks)).join("")}</tr>
+      <tr>${qTd("備註",true)}<td colspan="${totalCols}" style="${BP}">${sEsc(sharedRemarks).replace(/\n/g,"<br>")}</td></tr>
     </tbody>
   </table>`;
 
@@ -1739,8 +1968,66 @@ ${body}
 </div>
 </body>
 </html>`;
-  const name = `${todayStr().replaceAll("/","")}-${safeFileName(sCaseData?.applicant?.companyName||"報價彙整")}-報價彙整.doc`;
-  dlFile(name, "\ufeff"+html, "application/msword;charset=utf-8");
+  const rawName = String(s$("s-summaryFileName")?.value || "").trim();
+  const baseName = rawName ? safeFileName(rawName) : safeFileName(sDefaultSummaryBaseName(sCaseData));
+  const name = `${baseName}.doc`;
+  const content = "\ufeff"+html;
+  if (download) dlFile(name, content, "application/msword;charset=utf-8");
+  return {name, content, mime:"application/msword;charset=utf-8"};
+}
+
+async function sSaveSummaryToFolder(){
+  if(!sCaseData) return;
+  const currentName = String(s$("s-summaryFileName")?.value || sDefaultSummaryBaseName(sCaseData)).replace(/\.doc$/i,"");
+  const finalName = safeFileName(currentName);
+  if (s$("s-summaryFileName")) s$("s-summaryFileName").value = finalName;
+  const word = sExportWord(false);
+  if(!word) return;
+  const jsonName = word.name.replace(/\.doc$/i, "-summaryData.json");
+  const summaryData = {
+    savedAt: new Date().toISOString(),
+    sourceCaseData: sCaseData,
+    caseType: s$("s-caseType").value,
+    quotes: sReadQuotes(),
+    lastYear: {
+      company: s$("s-lastCompany")?.value || "",
+      premium: s$("s-lastPremium")?.value || "",
+      remarks: s$("s-lastRemarks")?.value || ""
+    },
+    sharedExplanation: s$("s-sharedExp")?.value || "",
+    sharedRemarks: s$("s-sharedRemarks")?.value || "",
+    fileName: s$("s-summaryFileName")?.value || "",
+    theme: getTheme("s")
+  };
+  try {
+    if (!window.showSaveFilePicker) {
+      dlFile(word.name, word.content, word.mime);
+      dlFile(jsonName, JSON.stringify(summaryData,null,2), "application/json;charset=utf-8");
+      s$("s-status").textContent="瀏覽器不支援另存新檔，已改用下載。";
+      return;
+    }
+    const wordHandle = await window.showSaveFilePicker({
+      suggestedName: word.name,
+      types: [{description:"Word 文件", accept: {"application/msword":[".doc"]}}]
+    });
+    const wordWritable = await wordHandle.createWritable();
+    await wordWritable.write(new Blob([word.content], {type:word.mime}));
+    await wordWritable.close();
+    const savedWordName = wordHandle.name || word.name;
+    if (s$("s-summaryFileName")) s$("s-summaryFileName").value = savedWordName.replace(/\.doc$/i,"");
+    const jsonHandle = await window.showSaveFilePicker({
+      suggestedName: savedWordName.replace(/\.doc$/i, "-summaryData.json"),
+      types: [{description:"JSON 資料", accept: {"application/json":[".json"]}}]
+    });
+    const jsonWritable = await jsonHandle.createWritable();
+    await jsonWritable.write(new Blob([JSON.stringify(summaryData,null,2)], {type:"application/json;charset=utf-8"}));
+    await jsonWritable.close();
+    s$("s-status").textContent="已儲存彙整";
+    s$("s-caseDataStatus").textContent=`已儲存彙整：${savedWordName}、${jsonHandle.name || jsonName}`;
+  } catch (err) {
+    if (err?.name === "AbortError") return;
+    alert(err.message || err);
+  }
 }
 
 function sSample(){
@@ -1750,25 +2037,29 @@ function sSample(){
 }
 
 s$("s-colCount").addEventListener("change",()=>{sRenderInputs();sGenerate();});
-s$("s-searchBtn").addEventListener("click",()=>sSearchDrafts().catch(err=>alert(err.message||err)));
 s$("s-caseType").addEventListener("change",()=>{s$("s-renewalBlock").style.display=s$("s-caseType").value==="renewal"?"":"none";sGenerate();});
 s$("s-generateBtn").addEventListener("click",sGenerate);
 s$("s-wordBtn").addEventListener("click",sExportWord);
+s$("s-loadCaseFileBtn").addEventListener("click",()=>sPickCaseData().catch(err=>alert(err.message||err)));
+s$("s-caseFileInput").addEventListener("change",e=>{
+  const file = e.target.files && e.target.files[0];
+  if(file) sLoadCase(file).catch(err=>alert(err.message||err));
+  e.target.value = "";
+});
+s$("s-saveFolderBtn").addEventListener("click",()=>sSaveSummaryToFolder().catch(err=>alert(err.message||err)));
 s$("s-printBtn").addEventListener("click",()=>{sGenerate();window.print();});
 s$("s-sampleBtn").addEventListener("click",sSample);
 s$("s-clearBtn").addEventListener("click",()=>{
   sCaseData=null;
-  s$("s-searchText").value="";
-  s$("s-searchType").value="";
-  s$("s-searchResults").style.display="none";
-  s$("s-searchResults").innerHTML="";
-  s$("s-caseDataStatus").textContent="請搜尋案件草稿並載入。本頁不讀 PDF，也不讓使用者上傳 JSON。";
+  sCaseDataFileLabel="";
+  s$("s-selectedCaseFile").value="";
+  s$("s-caseDataStatus").textContent="請直接選擇案件資料夾內的 _caseData JSON 檔。";
   s$("s-caseType").value="new";
   s$("s-renewalBlock").style.display="none";
-  ["s-lastCompany","s-lastPremium","s-lastRemarks"].forEach(id=>s$(id)&&(s$(id).value=""));
+  ["s-lastCompany","s-lastPremium","s-lastRemarks","s-summaryFileName"].forEach(id=>s$(id)&&(s$(id).value=""));
   s$("s-status").textContent="尚未讀取";
   sRenderInputs();
-  s$("s-preview").innerHTML='<div class="empty">搜尋並載入案件後，輸入報價再按「產生彙整報價單」。</div>';
+  s$("s-preview").innerHTML='<div class="empty">選擇案件 caseData 後，輸入報價再按「產生彙整報價單」。</div>';
 });
 sRenderInputs();
 initThemeButtons();
