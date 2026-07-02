@@ -19,6 +19,7 @@
 - Git（如果要從 GitHub clone 專案；用下載 ZIP 的方式也可以不裝）
 - 可選：Supabase 帳號與專案（不裝也能用本機模式）
 
+
 ## 第一次下載後怎麼使用
 
 1. 從 GitHub 下載或 clone 專案
@@ -26,9 +27,11 @@
 3. 執行 `npm install`
 4. 複製 `.env.example` 成 `.env`
 5. 視情況修改 `.env`（本機測試通常不用改）
-6. 視情況複製 `config.example.json` 成 `config.json`（想自訂案件存放位置才需要）
-7. 執行 `npm start`
-8. 打開瀏覽器輸入 `http://localhost:8787`
+6. 第一次啟動請執行 `npm start`
+7. 系統會自動在目前登入使用者的桌面建立「保險報價案件」資料夾，所有案件都會自動儲存在此資料夾。
+8. 如果沒有自動建立，請手動在桌面建立一個名為「保險報價案件」的資料夾。
+9. 若想把案件存到 D 槽、NAS 或其他位置，請將 `config.example.json` 複製成 `config.json`，並修改 `archiveRoot` 路徑即可。一般使用者不需要建立 `config.json`。
+10. 開啟瀏覽器輸入 `http://localhost:8787`
 
 ## Windows 完整指令
 
