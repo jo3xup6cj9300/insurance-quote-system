@@ -1,0 +1,43 @@
+# dependencies
+node_modules/
+
+# environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# per-machine config（每台電腦自己的歸檔路徑設定，不可共用）
+config.json
+!config.example.json
+
+# local data（本機測試資料，內含測試案件與可能的真實資料）
+backend/data/*.json
+
+# generated case files / archive folders
+*.pdf
+*.docx
+*.doc
+*.html
+!frontend/index.html
+archive/
+backend/archive/
+tmp-test-archive/
+保險報價案件/
+
+# logs
+*.log
+tmp-server-*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# temporary files
+tmp/
+temp/
+.cache/
